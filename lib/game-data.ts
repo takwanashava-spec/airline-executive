@@ -1,12 +1,29 @@
 export type Hub = {
   code: string;
+  icao?: string;
   city: string;
   name: string;
   country: string;
+  countryCode?: string;
   currency: string;
   market: string;
   runway: string;
   slotPressure: "Low" | "Medium" | "High";
+  latitude?: number;
+  longitude?: number;
+  elevationFt?: number;
+  airportType?: string;
+  runwayCount?: number;
+  terminalCount?: number;
+  slotCapacityPerHour?: number;
+  availableSlotsPercent?: number;
+  passengerDemand?: number;
+  cargoDemand?: number;
+  annualPassengers?: number;
+  annualCargoTonnes?: number;
+  scheduledService?: boolean;
+  infrastructureSource?: "Reference data" | "Modelled estimate";
+  trafficSource?: "Published figure" | "Simulation estimate";
   coordinates: { x: number; y: number };
 };
 
@@ -15,6 +32,7 @@ export type Aircraft = {
   family: string;
   seats: number;
   range: number;
+  cruiseSpeed: number;
   monthlyLease: number;
   fuelBurn: number;
   reliability: number;
@@ -43,17 +61,47 @@ export type RouteSeed = {
 };
 
 export const hubs: Hub[] = [
-  { code: "JNB", city: "Johannesburg", name: "O.R. Tambo International", country: "South Africa", currency: "ZAR", market: "Southern Africa", runway: "4,418 m", slotPressure: "Medium", coordinates: { x: 58, y: 72 } },
-  { code: "LHR", city: "London", name: "Heathrow", country: "United Kingdom", currency: "GBP", market: "Europe", runway: "3,902 m", slotPressure: "High", coordinates: { x: 49, y: 31 } },
-  { code: "DXB", city: "Dubai", name: "Dubai International", country: "United Arab Emirates", currency: "AED", market: "Middle East", runway: "4,447 m", slotPressure: "High", coordinates: { x: 61, y: 44 } },
-  { code: "SIN", city: "Singapore", name: "Changi", country: "Singapore", currency: "SGD", market: "Southeast Asia", runway: "4,000 m", slotPressure: "Medium", coordinates: { x: 79, y: 58 } },
-  { code: "ATL", city: "Atlanta", name: "Hartsfield–Jackson", country: "United States", currency: "USD", market: "North America", runway: "3,776 m", slotPressure: "High", coordinates: { x: 24, y: 42 } },
+  { code: "JNB", icao: "FAOR", city: "Johannesburg", name: "O.R. Tambo International", country: "South Africa", countryCode: "ZA", currency: "ZAR", market: "Southern Africa", runway: "4,418 m", slotPressure: "Medium", latitude: -26.1392, longitude: 28.246, elevationFt: 5_558, airportType: "Large international", runwayCount: 2, terminalCount: 2, slotCapacityPerHour: 58, availableSlotsPercent: 31, passengerDemand: 82, cargoDemand: 78, annualPassengers: 22_400_000, annualCargoTonnes: 418_000, scheduledService: true, infrastructureSource: "Reference data", trafficSource: "Simulation estimate", coordinates: { x: 58, y: 72 } },
+  { code: "LHR", icao: "EGLL", city: "London", name: "Heathrow", country: "United Kingdom", countryCode: "GB", currency: "GBP", market: "Europe", runway: "3,902 m", slotPressure: "High", latitude: 51.47, longitude: -0.4543, elevationFt: 83, airportType: "Large international", runwayCount: 2, terminalCount: 4, slotCapacityPerHour: 88, availableSlotsPercent: 7, passengerDemand: 97, cargoDemand: 90, annualPassengers: 83_900_000, annualCargoTonnes: 1_530_000, scheduledService: true, infrastructureSource: "Reference data", trafficSource: "Simulation estimate", coordinates: { x: 49, y: 31 } },
+  { code: "DXB", icao: "OMDB", city: "Dubai", name: "Dubai International", country: "United Arab Emirates", countryCode: "AE", currency: "AED", market: "Middle East", runway: "4,447 m", slotPressure: "High", latitude: 25.2532, longitude: 55.3657, elevationFt: 62, airportType: "Large international", runwayCount: 2, terminalCount: 3, slotCapacityPerHour: 92, availableSlotsPercent: 11, passengerDemand: 96, cargoDemand: 94, annualPassengers: 91_800_000, annualCargoTonnes: 2_180_000, scheduledService: true, infrastructureSource: "Reference data", trafficSource: "Simulation estimate", coordinates: { x: 61, y: 44 } },
+  { code: "SIN", icao: "WSSS", city: "Singapore", name: "Changi", country: "Singapore", countryCode: "SG", currency: "SGD", market: "Southeast Asia", runway: "4,000 m", slotPressure: "Medium", latitude: 1.3502, longitude: 103.994, elevationFt: 22, airportType: "Large international", runwayCount: 3, terminalCount: 4, slotCapacityPerHour: 84, availableSlotsPercent: 24, passengerDemand: 94, cargoDemand: 92, annualPassengers: 68_300_000, annualCargoTonnes: 1_970_000, scheduledService: true, infrastructureSource: "Reference data", trafficSource: "Simulation estimate", coordinates: { x: 79, y: 58 } },
+  { code: "ATL", icao: "KATL", city: "Atlanta", name: "Hartsfield–Jackson", country: "United States", countryCode: "US", currency: "USD", market: "North America", runway: "3,776 m", slotPressure: "High", latitude: 33.6367, longitude: -84.4281, elevationFt: 1_026, airportType: "Large international", runwayCount: 5, terminalCount: 2, slotCapacityPerHour: 126, availableSlotsPercent: 14, passengerDemand: 98, cargoDemand: 85, annualPassengers: 104_600_000, annualCargoTonnes: 730_000, scheduledService: true, infrastructureSource: "Reference data", trafficSource: "Simulation estimate", coordinates: { x: 24, y: 42 } },
 ];
 
 export const aircraft: Aircraft[] = [
-  { model: "ATR 72-600", family: "Turboprop", seats: 72, range: 1_528, monthlyLease: 2_650_000, fuelBurn: 2.2, reliability: 98.7, turnaround: 28 },
-  { model: "Embraer E195-E2", family: "Regional jet", seats: 132, range: 4_815, monthlyLease: 5_950_000, fuelBurn: 4.9, reliability: 98.1, turnaround: 36 },
-  { model: "Airbus A220-300", family: "Narrow-body", seats: 145, range: 6_297, monthlyLease: 7_200_000, fuelBurn: 5.2, reliability: 97.9, turnaround: 39 },
+  {
+    model: "ATR 72-600",
+    family: "Turboprop",
+    seats: 72,
+    range: 1_528,
+    cruiseSpeed: 510,
+    monthlyLease: 2_650_000,
+    fuelBurn: 2.2,
+    reliability: 98.7,
+    turnaround: 28,
+  },
+  {
+    model: "Embraer E195-E2",
+    family: "Regional jet",
+    seats: 132,
+    range: 4_815,
+    cruiseSpeed: 870,
+    monthlyLease: 5_950_000,
+    fuelBurn: 4.9,
+    reliability: 98.1,
+    turnaround: 36,
+  },
+  {
+    model: "Airbus A220-300",
+    family: "Narrow-body",
+    seats: 145,
+    range: 6_297,
+    cruiseSpeed: 871,
+    monthlyLease: 7_200_000,
+    fuelBurn: 5.2,
+    reliability: 97.9,
+    turnaround: 39,
+  },
 ];
 
 export const strategies: Strategy[] = [
