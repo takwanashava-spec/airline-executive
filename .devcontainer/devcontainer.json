@@ -1,0 +1,15 @@
+{
+  "name": "Airline Executive",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+  "forwardPorts": [3000, 5173],
+  "portsAttributes": {
+    "3000": { "label": "Airline Executive", "onAutoForward": "openPreview" },
+    "5173": { "label": "Airline Executive (Vite)", "onAutoForward": "openPreview" }
+  },
+  "postCreateCommand": "npm ci",
+  "customizations": {
+    "vscode": {
+      "extensions": ["bradlc.vscode-tailwindcss", "dbaeumer.vscode-eslint"]
+    }
+  }
+}
