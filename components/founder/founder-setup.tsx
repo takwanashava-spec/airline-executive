@@ -12,7 +12,6 @@ import {
   MapPin,
   Plane,
   PlaneTakeoff,
-  Route,
   Search,
   ShieldCheck,
   Users,
@@ -900,4 +899,3 @@ export function FounderSetup({
     </div>
   );
 }
-
