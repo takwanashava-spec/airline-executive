@@ -51,6 +51,9 @@ export default defineConfig(async () => {
         ? { watch: { useFsEvents: false, usePolling: true } }
         : {}),
     },
+        optimizeDeps: {
+      exclude: ["airport-data-js"],
+    },
     plugins: [
       vinext(),
       sites(),

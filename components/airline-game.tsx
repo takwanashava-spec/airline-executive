@@ -77,6 +77,10 @@ type View = "overview" | "network" | "fleet" | "finance";
 
 type AirlineState = {
   airlineName: string;
+  ceoName: string;
+  ceoNationality: string;
+  ceoAge: number;
+  ceoBackground: string;
   iata: string;
   icao: string;
   hub: Hub;
@@ -344,6 +348,10 @@ function FounderSetup({
 }) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("Aurelia Air");
+  const [ceoName, setCeoName] = useState("");
+  const [ceoNationality, setCeoNationality] = useState("");
+  const [ceoAge, setCeoAge] = useState(35);
+  const [ceoBackground, setCeoBackground] = useState("");
   const [iata, setIata] = useState("AU");
   const [icao, setIcao] = useState("AUR");
   const [hub, setHub] = useState<Hub>(hubs[0]);
@@ -495,6 +503,10 @@ function FounderSetup({
 
     onLaunch({
       airlineName: name.trim() || "Aurelia Air",
+      ceoName: ceoName.trim(),
+      ceoNationality: ceoNationality.trim(),
+      ceoAge,
+      ceoBackground: ceoBackground.trim(),
       iata: iata.toUpperCase(),
       icao: icao.toUpperCase(),
       hub,
@@ -584,7 +596,68 @@ function FounderSetup({
               coded airport as your headquarters.
             </p>
 
-            <div className="form-grid">
+                        <div className="form-grid">
+              <div className="field full">
+                <Label htmlFor="ceo-name">Chief executive name</Label>
+
+                <Input
+                  id="ceo-name"
+                  value={ceoName}
+                  onChange={(event) =>
+                    setCeoName(event.target.value)
+                  }
+                  placeholder="Enter your virtual CEO name"
+                  maxLength={50}
+                />
+              </div>
+
+              <div className="field">
+                <Label htmlFor="ceo-nationality">
+                  Nationality
+                </Label>
+
+                <Input
+                  id="ceo-nationality"
+                  value={ceoNationality}
+                  onChange={(event) =>
+                    setCeoNationality(event.target.value)
+                  }
+                  placeholder="e.g. Zimbabwean"
+                  maxLength={40}
+                />
+              </div>
+
+              <div className="field">
+                <Label htmlFor="ceo-age">Age</Label>
+
+                <Input
+                  id="ceo-age"
+                  type="number"
+                  value={ceoAge}
+                  onChange={(event) =>
+                    setCeoAge(Number(event.target.value))
+                  }
+                  min={18}
+                  max={100}
+                />
+              </div>
+
+              <div className="field full">
+                <Label htmlFor="ceo-background">
+                  Professional background
+                </Label>
+
+                <Input
+                  id="ceo-background"
+                  value={ceoBackground}
+                  onChange={(event) =>
+                    setCeoBackground(event.target.value)
+                  }
+                  placeholder="e.g. Aviation management, finance or entrepreneurship"
+                  maxLength={80}
+                />
+              </div>
+
               <div className="field full">
                 <Label htmlFor="airline-name">Airline name</Label>
 
@@ -1141,7 +1214,12 @@ function FounderSetup({
             <Button
               className="gold-button"
               onClick={() => setStep(step + 1)}
-              disabled={
+                disabled={
+                !ceoName.trim() ||
+                !ceoNationality.trim() ||
+                ceoAge < 18 ||
+                ceoAge > 100 ||
+                !ceoBackground.trim() ||
                 !name.trim() ||
                 iata.length !== 2 ||
                 icao.length !== 3
