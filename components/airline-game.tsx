@@ -61,7 +61,6 @@ import {
   hubs,
   routeSeeds,
   strategies,
-  type Aircraft,
   type Hub,
   type RouteSeed,
   type Strategy,
@@ -72,35 +71,17 @@ import {
   formatAnnualTraffic,
   searchAirports,
 } from "@/lib/airport-system";
+import { createInitialCareer } from "@/lib/game/create-career";
+import {
+  loadCareer,
+  saveCareer,
+} from "@/lib/game/persistence";
+import { advanceCareerWeek } from "@/lib/game/simulation";
+import type {
+  AirlineState,
+  View,
+} from "@/types/game";
 
-type View = "overview" | "network" | "fleet" | "finance";
-
-type AirlineState = {
-  airlineName: string;
-  ceoName: string;
-  ceoNationality: string;
-  ceoAge: number;
-  ceoBackground: string;
-  iata: string;
-  icao: string;
-  hub: Hub;
-  strategy: Strategy;
-  aircraft: Aircraft;
-  route: RouteSeed;
-  week: number;
-  cash: number;
-  reputation: number;
-  loadFactor: number;
-  onTime: number;
-  aircraftCondition: number;
-  fuelIndex: number;
-  lastRevenue: number;
-  lastCosts: number;
-  lastProfit: number;
-  passengers: number;
-};
-
-const STORAGE_KEY = "airline-executive-career-v1";
 const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const navItems = [
@@ -464,67 +445,21 @@ function FounderSetup({
   };
 
   const launch = () => {
-    const initialCash =
-      strategy.capital -
-      selectedAircraft.monthlyLease * 3 -
-      4_800_000;
-
-    const initialLoad = Math.round(
-      Math.min(
-        84,
-        route.demand * 0.76 * strategy.demandMultiplier,
-      ),
+    onLaunch(
+      createInitialCareer({
+        airlineName: name,
+        ceoName,
+        ceoNationality,
+        ceoAge,
+        ceoBackground,
+        iata,
+        icao,
+        hub,
+        strategy,
+        aircraft: selectedAircraft,
+        route,
+      }),
     );
-
-    const sectors = route.weeklyFlights * 2;
-
-    const passengers = Math.round(
-      sectors *
-        selectedAircraft.seats *
-        (initialLoad / 100),
-    );
-
-    const revenue =
-      passengers *
-      route.baseFare *
-      strategy.fareMultiplier;
-
-    const variable =
-      sectors *
-      route.distance *
-      selectedAircraft.fuelBurn *
-      10.8;
-
-    const costs =
-      variable +
-      selectedAircraft.monthlyLease / 4.33 +
-      sectors * 31_000 +
-      690_000;
-
-    onLaunch({
-      airlineName: name.trim() || "Aurelia Air",
-      ceoName: ceoName.trim(),
-      ceoNationality: ceoNationality.trim(),
-      ceoAge,
-      ceoBackground: ceoBackground.trim(),
-      iata: iata.toUpperCase(),
-      icao: icao.toUpperCase(),
-      hub,
-      strategy,
-      aircraft: selectedAircraft,
-      route,
-      week: 1,
-      cash: initialCash,
-      reputation: 50,
-      loadFactor: initialLoad,
-      onTime: 91.4,
-      aircraftCondition: 100,
-      fuelIndex: 104.6,
-      lastRevenue: revenue,
-      lastCosts: costs,
-      lastProfit: revenue - costs,
-      passengers,
-    });
   };
 
   return (
@@ -2035,22 +1970,9 @@ export default function AirlineGame() {
   const [speed, setSpeed] = useState(1);
 
   useEffect(() => {
-    const stored =
-      window.localStorage.getItem(STORAGE_KEY);
-
-    let savedGame: AirlineState | null = null;
-
-    if (stored) {
-      try {
-        savedGame = JSON.parse(
-          stored,
-        ) as AirlineState;
-      } catch {
-        window.localStorage.removeItem(
-          STORAGE_KEY,
-        );
-      }
-    }
+    const savedGame = loadCareer(
+      window.localStorage,
+    );
 
     queueMicrotask(() => {
       setGame(savedGame);
@@ -2060,10 +1982,7 @@ export default function AirlineGame() {
 
   useEffect(() => {
     if (game && loaded) {
-      window.localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(game),
-      );
+      saveCareer(window.localStorage, game);
     }
   }, [game, loaded]);
 
@@ -2086,108 +2005,20 @@ export default function AirlineGame() {
   const advanceWeek = () => {
     if (!game) return;
 
-    const nextWeek = game.week + 1;
+    const result = advanceCareerWeek(game);
 
-    const demandWave =
-      Math.sin(nextWeek * 1.47) * 2.8;
-
-    const operationalNoise =
-      Math.cos(nextWeek * 0.91) * 1.9;
-
-    const nextLoad = Math.max(
-      42,
-      Math.min(
-        94,
-        Math.round(
-          game.loadFactor +
-            1.4 +
-            demandWave,
-        ),
-      ),
-    );
-
-    const nextOnTime = Math.max(
-      81,
-      Math.min(
-        98.5,
-        game.onTime + operationalNoise,
-      ),
-    );
-
-    const fuelIndex = Math.max(
-      92,
-      Math.min(
-        124,
-        game.fuelIndex +
-          Math.sin(nextWeek) * 2.1,
-      ),
-    );
-
-    const sectors =
-      game.route.weeklyFlights * 2;
-
-    const passengers = Math.round(
-      sectors *
-        game.aircraft.seats *
-        (nextLoad / 100),
-    );
-
-    const revenue =
-      passengers *
-      game.route.baseFare *
-      game.strategy.fareMultiplier;
-
-    const fuelCost =
-      sectors *
-      game.route.distance *
-      game.aircraft.fuelBurn *
-      10.8 *
-      (fuelIndex / 100);
-
-    const costs =
-      fuelCost +
-      game.aircraft.monthlyLease / 4.33 +
-      sectors * 31_000 +
-      690_000 +
-      (nextOnTime < 87 ? 210_000 : 0);
-
-    const profit = revenue - costs;
-
-    setGame({
-      ...game,
-      week: nextWeek,
-      cash: game.cash + profit,
-      reputation: Math.max(
-        0,
-        Math.min(
-          100,
-          game.reputation +
-            (nextOnTime >= 90 ? 1 : -1),
-        ),
-      ),
-      loadFactor: nextLoad,
-      onTime: nextOnTime,
-      aircraftCondition: Math.max(
-        72,
-        game.aircraftCondition - 0.65,
-      ),
-      fuelIndex,
-      lastRevenue: revenue,
-      lastCosts: costs,
-      lastProfit: profit,
-      passengers,
-    });
+    setGame(result.game);
 
     toast(
-      profit >= 0
-        ? `Week ${nextWeek} closed with ${formatMoney(
-            profit,
+      result.profit >= 0
+        ? `Week ${result.week} closed with ${formatMoney(
+            result.profit,
           )} operating profit`
-        : `Week ${nextWeek} closed with a ${formatMoney(
-            profit,
+        : `Week ${result.week} closed with a ${formatMoney(
+            result.profit,
           )} loss`,
       {
-        description: `${passengers.toLocaleString()} passengers · ${nextLoad}% load factor`,
+        description: `${result.passengers.toLocaleString()} passengers · ${result.loadFactor}% load factor`,
       },
     );
   };
