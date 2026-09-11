@@ -690,3 +690,144 @@ button:focus-visible,input:focus-visible { outline:3px solid rgba(242,184,75,.45
     margin-left: 0;
   }
 }
+
+
+/* Manufacturer directory navigation */
+.manufacturer-directory {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.manufacturer-directory-card {
+  min-width: 0;
+  min-height: 225px;
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #dce3e8;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #fff, #f6f9fa);
+  color: #17283e;
+  text-align: left;
+  box-shadow: 0 5px 16px rgba(20, 38, 59, .04);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.manufacturer-directory-card:hover {
+  border-color: #c99336;
+  box-shadow: 0 12px 26px rgba(20, 38, 59, .1);
+  transform: translateY(-2px);
+}
+
+.manufacturer-directory-card .manufacturer-logo {
+  width: 100%;
+  min-width: 0;
+  height: 68px;
+}
+
+.manufacturer-directory-card > div:not(.manufacturer-logo) {
+  display: flex;
+  flex-direction: column;
+  gap: .26rem;
+}
+
+.manufacturer-directory-card > div > span {
+  color: #9a6c22;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+  line-height: 1.35;
+}
+
+.manufacturer-directory-card h3 {
+  margin: 0;
+  color: #17283e;
+  font-size: .96rem;
+}
+
+.manufacturer-directory-card small {
+  color: #7e8a97;
+  font-size: .65rem;
+}
+
+.manufacturer-directory-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: auto;
+  padding-top: .75rem;
+  border-top: 1px solid #e1e7eb;
+  color: #748292;
+  font-size: .66rem;
+}
+
+.manufacturer-directory-card footer strong {
+  color: #193b5e;
+}
+
+.manufacturer-directory-card footer svg {
+  width: 17px;
+  color: #c2882e;
+}
+
+.manufacturer-showroom-nav {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .7rem;
+  padding: .45rem .65rem;
+  border: 1px solid #dfe5ea;
+  border-radius: 7px;
+  background: #f7f9fa;
+}
+
+.manufacturer-showroom-nav button {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .55rem;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #21476c;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.manufacturer-showroom-nav button:hover {
+  background: #e9eef2;
+}
+
+.manufacturer-showroom-nav button svg {
+  width: 16px;
+}
+
+.manufacturer-showroom-nav > span {
+  color: #7c8996;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+  .manufacturer-directory {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .manufacturer-directory {
+    grid-template-columns: 1fr;
+  }
+
+  .manufacturer-directory-card {
+    min-height: 205px;
+  }
+}
