@@ -5,7 +5,9 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 3;
+export const CURRENT_SAVE_VERSION = 4;
+
+export type GameSpeed = 0 | 1 | 2 | 4;
 
 export type View =
   | "overview"
@@ -29,6 +31,7 @@ export type AirlineState = {
   strategy: Strategy;
   aircraft: Aircraft | null;
   route: RouteSeed | null;
+  gameDateTime: string;
   week: number;
   cash: number;
   reputation: number;
