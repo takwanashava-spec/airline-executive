@@ -17,6 +17,8 @@ export function NetworkView({ game, onSubmitSlotApplication }: { game: AirlineSt
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Hub[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchedQuery, setSearchedQuery] = useState("");
+  const [searchFailed, setSearchFailed] = useState(false);
   const [destination, setDestination] = useState<Hub | null>(null);
   const [aircraftId, setAircraftId] = useState("");
   const [frequency, setFrequency] = useState(7);
@@ -31,7 +33,18 @@ export function NetworkView({ game, onSubmitSlotApplication }: { game: AirlineSt
     if (query.trim().length < 2) return;
     const timer = window.setTimeout(() => {
       setSearching(true);
-      searchAirports(query).then((items) => setResults(items.filter((item) => item.code !== game.hub.code))).finally(() => setSearching(false));
+      setSearchFailed(false);
+      searchAirports(query)
+        .then((items) => {
+          setResults(items.filter((item) => item.code !== game.hub.code));
+          setSearchedQuery(query.trim());
+        })
+        .catch(() => {
+          setResults([]);
+          setSearchedQuery(query.trim());
+          setSearchFailed(true);
+        })
+        .finally(() => setSearching(false));
     }, 250);
     return () => window.clearTimeout(timer);
   }, [query, game.hub.code]);
@@ -63,7 +76,8 @@ export function NetworkView({ game, onSubmitSlotApplication }: { game: AirlineSt
     {section === "planner" && <div className="route-planner-grid">
       <article className="panel route-planner-form"><div className="panel-heading compact"><div><span className="panel-eyebrow">DESTINATION RESEARCH</span><h2>Build a route proposal</h2></div></div>
         <label className="route-field"><span>DESTINATION AIRPORT</span><div className="route-search"><Search /><input value={query} onChange={(event) => { setQuery(event.target.value); if (event.target.value.trim().length < 2) setResults([]); }} placeholder="Search city, airport, IATA or ICAO" />{searching && <i />}</div></label>
-        {query.trim().length >= 2 && results.length > 0 && <div className="route-search-results">{results.map((hub) => <button key={`${hub.code}-${hub.icao}`} onClick={() => chooseDestination(hub)}><b>{hub.code}</b><span><strong>{hub.city}</strong><small>{hub.name} · {hub.country}</small></span><em>{hub.slotPressure} slot pressure</em></button>)}</div>}
+        {query.trim().length >= 2 && results.length > 0 && <div className="route-search-results">{results.map((hub) => <button type="button" key={`${hub.code}-${hub.icao}`} onClick={() => chooseDestination(hub)}><b>{hub.code}</b><span><strong>{hub.city}</strong><small>{hub.name} · {hub.country}</small></span><em>{hub.slotPressure} slot pressure</em></button>)}</div>}
+        {query.trim().length >= 2 && results.length === 0 && <div className="route-search-feedback">{searching || searchedQuery !== query.trim() ? "Searching the worldwide airport catalogue…" : searchFailed ? "Airport search could not load. Please try again." : "No matching commercial airport found. Try an IATA code, city or airport name."}</div>}
         {destination && <div className="selected-destination"><b>{destination.code}</b><span><strong>{destination.name}</strong><small>{destination.city}, {destination.country}</small></span><button onClick={() => setDestination(null)}>Change</button></div>}
         <div className="route-form-grid">
           <label className="route-field"><span>AIRCRAFT</span><select value={aircraftId} onChange={(event) => setAircraftId(event.target.value)}><option value="">Select operational aircraft</option>{readyAircraft.map((item) => <option key={item.id} value={item.id}>{item.registration} · {item.aircraft.model} · {item.aircraft.range.toLocaleString()} km</option>)}</select><small>{readyAircraft.length ? "Only inducted, parked aircraft are shown." : "Complete aircraft induction before route assignment."}</small></label>
