@@ -26,21 +26,100 @@ function isFiniteNumber(value: unknown) {
   );
 }
 
-function isFleetAircraft(
+function migrateFleetAircraft(
   value: unknown,
-): value is FleetAircraft {
-  return (
-    isRecord(value) &&
-    typeof value.id === "string" &&
-    typeof value.registration === "string" &&
-    isRecord(value.aircraft) &&
-    typeof value.acquiredAt === "string" &&
-    isFiniteNumber(value.purchasePrice) &&
-    isFiniteNumber(value.condition) &&
-    (value.status === "parked" ||
+  index: number,
+  fallbackDate: string,
+): FleetAircraft | null {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.registration !== "string" ||
+    !isRecord(value.aircraft)
+  ) {
+    return null;
+  }
+
+  const purchasePrice = isFiniteNumber(
+    value.purchasePrice,
+  )
+    ? value.purchasePrice
+    : 0;
+  const acquisitionType =
+    value.acquisitionType === "owned" ||
+    value.acquisitionType === "leased" ||
+    value.acquisitionType === "financed"
+      ? value.acquisitionType
+      : purchasePrice > 0
+        ? "owned"
+        : "leased";
+  const market =
+    value.market === "new" ||
+    value.market === "used" ||
+    value.market === "lessor"
+      ? value.market
+      : acquisitionType === "leased"
+        ? "lessor"
+        : "new";
+  const legacyMonthlyLease =
+    isFiniteNumber(
+      value.aircraft.monthlyLease,
+    )
+      ? value.aircraft.monthlyLease
+      : 0;
+
+  return {
+    ...(value as unknown as FleetAircraft),
+    id:
+      value.id ||
+      `aircraft-${index + 1}`,
+    registration: value.registration,
+    aircraft:
+      value.aircraft as unknown as FleetAircraft["aircraft"],
+    acquiredAt:
+      typeof value.acquiredAt === "string"
+        ? value.acquiredAt
+        : fallbackDate,
+    purchasePrice,
+    condition: isFiniteNumber(value.condition)
+      ? value.condition
+      : 100,
+    status:
       value.status === "active" ||
-      value.status === "maintenance")
-  );
+      value.status === "maintenance"
+        ? value.status
+        : "parked",
+    acquisitionType,
+    market,
+    provider:
+      typeof value.provider === "string"
+        ? value.provider
+        : acquisitionType === "leased"
+          ? "Legacy lease contract"
+          : "Aircraft market",
+    monthlyPayment: isFiniteNumber(
+      value.monthlyPayment,
+    )
+      ? value.monthlyPayment
+      : acquisitionType === "leased"
+        ? legacyMonthlyLease
+        : 0,
+    outstandingBalance: isFiniteNumber(
+      value.outstandingBalance,
+    )
+      ? value.outstandingBalance
+      : 0,
+    manufactureYear: isFiniteNumber(
+      value.manufactureYear,
+    )
+      ? value.manufactureYear
+      : 2026,
+    flightHours: isFiniteNumber(
+      value.flightHours,
+    )
+      ? value.flightHours
+      : 0,
+  };
 }
 
 function hasCoreCareerFields(
@@ -128,7 +207,20 @@ export function migrateCareer(
     : null;
   const fleet: FleetAircraft[] =
     Array.isArray(value.fleet)
-      ? value.fleet.filter(isFleetAircraft)
+      ? value.fleet
+          .map((item, index) =>
+            migrateFleetAircraft(
+              item,
+              index,
+              gameDateTime,
+            ),
+          )
+          .filter(
+            (
+              item,
+            ): item is FleetAircraft =>
+              item !== null,
+          )
       : legacyAircraft
         ? [
             {
@@ -146,6 +238,18 @@ export function migrateCareer(
               status: isRecord(value.route)
                 ? "active"
                 : "parked",
+              acquisitionType: "leased",
+              market: "lessor",
+              provider: "Legacy lease contract",
+              monthlyPayment:
+                isFiniteNumber(
+                  legacyAircraft.monthlyLease,
+                )
+                  ? legacyAircraft.monthlyLease
+                  : 0,
+              outstandingBalance: 0,
+              manufactureYear: 2026,
+              flightHours: 0,
             },
           ]
         : [];
