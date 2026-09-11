@@ -3,6 +3,8 @@
 import { useState } from "react";
 import {
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   Gauge,
   Plane,
   ShieldCheck,
@@ -59,6 +61,12 @@ export function FleetView({
 }) {
   const [market, setMarket] =
     useState<AircraftMarket>("new");
+  const [
+    selectedManufacturer,
+    setSelectedManufacturer,
+  ] = useState<AircraftManufacturerId | null>(
+    null,
+  );
   const primaryAircraft =
     game.fleet[0] ?? null;
   const ownedCount = game.fleet.filter(
@@ -348,9 +356,12 @@ export function FleetView({
                   ? "active"
                   : ""
               }
-              onClick={() =>
-                setMarket(marketId)
-              }
+              onClick={() => {
+                setMarket(marketId);
+                setSelectedManufacturer(
+                  null,
+                );
+              }}
             >
               <span>
                 {marketLabels[marketId]}
@@ -371,14 +382,112 @@ export function FleetView({
 
         <p className="aircraft-market-note">
           {market === "new"
-            ? "Browse the current passenger-aircraft programmes of ATR, Embraer, Airbus and Boeing. Aircraft still in development are displayed but cannot yet be delivered."
+            ? "Select a manufacturer to enter its showroom and browse its current passenger-aircraft programmes."
             : market === "used"
               ? "Pre-owned aircraft trade at lower prices, with age, utilisation and condition affecting value."
               : "Operating leases require a three-month deposit and create a continuing monthly commitment."}
         </p>
 
-        <div className="manufacturer-groups">
-          {manufacturers.map(
+        {selectedManufacturer === null ? (
+          <div className="manufacturer-directory">
+            {manufacturers.map(
+              (manufacturer) => {
+                const details =
+                  manufacturerDetails(
+                    manufacturer,
+                  );
+                const offerCount =
+                  visibleOffers.filter(
+                    (offer) =>
+                      offer.manufacturer ===
+                      manufacturer,
+                  ).length;
+                const familyCount =
+                  new Set(
+                    visibleOffers
+                      .filter(
+                        (offer) =>
+                          offer.manufacturer ===
+                          manufacturer,
+                      )
+                      .map(
+                        (offer) =>
+                          offer.aircraft.family,
+                      ),
+                  ).size;
+
+                return (
+                  <button
+                    type="button"
+                    className="manufacturer-directory-card"
+                    key={manufacturer}
+                    onClick={() =>
+                      setSelectedManufacturer(
+                        manufacturer,
+                      )
+                    }
+                  >
+                    <ManufacturerLogo
+                      manufacturerId={
+                        manufacturer
+                      }
+                    />
+                    <div>
+                      <span>
+                        {details.fullName}
+                      </span>
+                      <h3>{details.division}</h3>
+                      <small>
+                        {details.headquarters}
+                      </small>
+                    </div>
+                    <footer>
+                      <span>
+                        <strong>
+                          {offerCount}
+                        </strong>{" "}
+                        models · {familyCount}{" "}
+                        families
+                      </span>
+                      <ChevronRight />
+                    </footer>
+                  </button>
+                );
+              },
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="manufacturer-showroom-nav">
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedManufacturer(
+                    null,
+                  )
+                }
+              >
+                <ChevronLeft />
+                All manufacturers
+              </button>
+              <span>
+                {
+                  manufacturerDetails(
+                    selectedManufacturer,
+                  ).name
+                }{" "}
+                showroom
+              </span>
+            </div>
+
+            <div className="manufacturer-groups">
+          {manufacturers
+            .filter(
+              (manufacturer) =>
+                manufacturer ===
+                selectedManufacturer,
+            )
+            .map(
             (manufacturer) => (
               <section
                 className="manufacturer-market"
@@ -660,7 +769,9 @@ export function FleetView({
               </section>
             ),
           )}
-        </div>
+            </div>
+          </>
+        )}
       </article>
     </section>
   );
