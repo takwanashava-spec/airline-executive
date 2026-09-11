@@ -197,8 +197,12 @@ export function CommandCentre({ game }: { game: AirlineState }) {
 
           <MetricCard
             label="Fleet"
-            value="0 aircraft"
-            change="Aircraft acquisition is your next decision"
+            value={`${game.fleet.length} aircraft`}
+            change={
+              game.aircraft
+                ? "Aircraft ready for route assignment"
+                : "Aircraft acquisition is your next decision"
+            }
             icon={Plane}
           />
 
@@ -231,7 +235,7 @@ export function CommandCentre({ game }: { game: AirlineState }) {
 
               <div>
                 <small>FLEET</small>
-                <strong>0 aircraft</strong>
+                <strong>{game.fleet.length} aircraft</strong>
               </div>
 
               <div>
@@ -250,25 +254,31 @@ export function CommandCentre({ game }: { game: AirlineState }) {
                 <h2>Your next decisions</h2>
               </div>
 
-              <span className="brief-count">2</span>
+              <span className="brief-count">
+                {game.aircraft ? 1 : 2}
+              </span>
             </div>
 
             <div className="brief-list">
-              <button disabled>
-                <span className="brief-icon blue">
-                  <Plane />
-                </span>
+              {!game.aircraft && (
+                <button disabled>
+                  <span className="brief-icon blue">
+                    <Plane />
+                  </span>
 
-                <div>
-                  <strong>Acquire your first aircraft</strong>
-                  <p>
-                    Build the fleet from inside the game instead of during
-                    registration.
-                  </p>
-                </div>
+                  <div>
+                    <strong>
+                      Acquire your first aircraft
+                    </strong>
+                    <p>
+                      Purchase an aircraft from the
+                      Fleet screen.
+                    </p>
+                  </div>
 
-                <ChevronRight />
-              </button>
+                  <ChevronRight />
+                </button>
+              )}
 
               <button disabled>
                 <span className="brief-icon green">
@@ -278,7 +288,9 @@ export function CommandCentre({ game }: { game: AirlineState }) {
                 <div>
                   <strong>Research and open a route</strong>
                   <p>
-                    Your network will begin after an aircraft is available.
+                    {game.aircraft
+                      ? "Your first aircraft is ready. Route planning is the next step."
+                      : "Your network will begin after an aircraft is available."}
                   </p>
                 </div>
 
@@ -515,14 +527,16 @@ export function CommandCentre({ game }: { game: AirlineState }) {
               <h2>Aircraft status</h2>
             </div>
 
-            <span className="fleet-count">1 aircraft</span>
+            <span className="fleet-count">
+              {game.fleet.length} aircraft
+            </span>
           </div>
 
           <div className="fleet-visual">
             <Plane />
 
             <div>
-              <span>{game.icao}-001</span>
+              <span>{game.fleet[0]?.registration ?? `${game.icao}-001`}</span>
               <strong>{game.aircraft.model}</strong>
               <small>
                 At {game.hub.code} · Next sector in 2h 18m
