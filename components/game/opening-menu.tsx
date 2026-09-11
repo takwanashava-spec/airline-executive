@@ -219,12 +219,12 @@ export function OpeningMenu({
 
             <div>
               <dt>Fleet</dt>
-              <dd>1 aircraft</dd>
+              <dd>{game.aircraft ? "1 aircraft" : "0 aircraft"}</dd>
             </div>
 
             <div>
               <dt>Network</dt>
-              <dd>1 route</dd>
+              <dd>{game.route ? "1 route" : "0 routes"}</dd>
             </div>
           </dl>
 
