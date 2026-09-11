@@ -1,5 +1,18 @@
 import type { AirlineState } from "@/types/game";
 
+export const GAME_MINUTES_PER_REAL_SECOND = 5;
+
+const INITIAL_GAME_TIME = Date.UTC(
+  2026,
+  8,
+  6,
+  8,
+  0,
+  0,
+);
+const GAME_WEEK_MILLISECONDS =
+  7 * 24 * 60 * 60 * 1_000;
+
 export type WeekResult = {
   game: AirlineState;
   week: number;
@@ -8,20 +21,74 @@ export type WeekResult = {
   profit: number;
 };
 
+export function advanceCareerClock(
+  currentGame: AirlineState,
+  gameMinutes: number,
+) {
+  if (
+    !Number.isFinite(gameMinutes) ||
+    gameMinutes <= 0
+  ) {
+    return currentGame;
+  }
+
+  const parsedGameTime = Date.parse(
+    currentGame.gameDateTime,
+  );
+  const currentGameTime = Number.isFinite(
+    parsedGameTime,
+  )
+    ? parsedGameTime
+    : INITIAL_GAME_TIME;
+  const nextGameTime =
+    currentGameTime +
+    gameMinutes * 60 * 1_000;
+  const targetWeek = Math.max(
+    1,
+    Math.floor(
+      (nextGameTime - INITIAL_GAME_TIME) /
+        GAME_WEEK_MILLISECONDS,
+    ) + 1,
+  );
+
+  let nextGame = currentGame;
+
+  while (nextGame.week < targetWeek) {
+    nextGame = advanceCareerWeek(nextGame).game;
+  }
+
+  return {
+    ...nextGame,
+    gameDateTime: new Date(
+      nextGameTime,
+    ).toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 export function advanceCareerWeek(
   currentGame: AirlineState,
 ): WeekResult {
+  const nextWeek = currentGame.week + 1;
+
   if (!currentGame.aircraft || !currentGame.route) {
     return {
-      game: currentGame,
-      week: currentGame.week,
+      game: {
+        ...currentGame,
+        updatedAt: new Date().toISOString(),
+        week: nextWeek,
+        passengers: 0,
+        loadFactor: 0,
+        lastRevenue: 0,
+        lastCosts: 0,
+        lastProfit: 0,
+      },
+      week: nextWeek,
       passengers: 0,
       loadFactor: 0,
       profit: 0,
     };
   }
-
-  const nextWeek = currentGame.week + 1;
 
   const demandWave =
     Math.sin(nextWeek * 1.47) * 2.8;
