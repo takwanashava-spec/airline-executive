@@ -104,6 +104,15 @@ export const aircraft: Aircraft[] = [
   },
 ];
 
+export const aircraftPurchasePrices: Record<
+  Aircraft["model"],
+  number
+> = {
+  "ATR 72-600": 62_000_000,
+  "Embraer E195-E2": 118_000_000,
+  "Airbus A220-300": 146_000_000,
+};
+
 export const strategies: Strategy[] = [
   { id: "regional", name: "Regional specialist", description: "High-frequency links between underserved cities with a lean cost base.", capital: 85_000_000, fareMultiplier: 0.88, demandMultiplier: 1.08 },
   { id: "network", name: "Network carrier", description: "Build a connected hub with balanced business and leisure demand.", capital: 150_000_000, fareMultiplier: 1, demandMultiplier: 1 },
