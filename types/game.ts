@@ -5,7 +5,7 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 5;
+export const CURRENT_SAVE_VERSION = 6;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
 
@@ -13,6 +13,16 @@ export type FleetAircraftStatus =
   | "parked"
   | "active"
   | "maintenance";
+
+export type AircraftAcquisitionType =
+  | "owned"
+  | "leased"
+  | "financed";
+
+export type AircraftMarket =
+  | "new"
+  | "used"
+  | "lessor";
 
 export type FleetAircraft = {
   id: string;
@@ -22,6 +32,13 @@ export type FleetAircraft = {
   purchasePrice: number;
   condition: number;
   status: FleetAircraftStatus;
+  acquisitionType: AircraftAcquisitionType;
+  market: AircraftMarket;
+  provider: string;
+  monthlyPayment: number;
+  outstandingBalance: number;
+  manufactureYear: number;
+  flightHours: number;
 };
 
 export type View =
