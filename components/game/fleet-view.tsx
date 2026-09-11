@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   CalendarDays,
   Gauge,
@@ -9,27 +10,139 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { formatMoney } from "@/lib/game-data";
 import {
-  aircraft,
-  aircraftPurchasePrices,
-  formatMoney,
-} from "@/lib/game-data";
-import type { AirlineState } from "@/types/game";
+  aircraftMarketOffers,
+  type AircraftAcquisitionMethod,
+  type AircraftMarketOffer,
+} from "@/lib/game/fleet";
+import type {
+  AircraftMarket,
+  AirlineState,
+} from "@/types/game";
+
+const marketLabels: Record<
+  AircraftMarket,
+  string
+> = {
+  new: "New aircraft",
+  used: "Used aircraft",
+  lessor: "Lessors",
+};
 
 export function FleetView({
   game,
-  onPurchaseAircraft,
+  onAcquireAircraft,
 }: {
   game: AirlineState;
-  onPurchaseAircraft: (
-    model: string,
+  onAcquireAircraft: (
+    offerId: string,
+    method: AircraftAcquisitionMethod,
   ) => void;
 }) {
+  const [market, setMarket] =
+    useState<AircraftMarket>("new");
   const primaryAircraft =
     game.fleet[0] ?? null;
+  const ownedCount = game.fleet.filter(
+    (item) =>
+      item.acquisitionType === "owned",
+  ).length;
+  const leasedCount = game.fleet.filter(
+    (item) =>
+      item.acquisitionType === "leased",
+  ).length;
+  const financedCount = game.fleet.filter(
+    (item) =>
+      item.acquisitionType === "financed",
+  ).length;
+  const fleetValue = game.fleet.reduce(
+    (total, item) =>
+      item.acquisitionType === "leased"
+        ? total
+        : total + item.purchasePrice,
+    0,
+  );
+  const monthlyCommitments =
+    game.fleet.reduce(
+      (total, item) =>
+        total + item.monthlyPayment,
+      0,
+    );
+  const visibleOffers =
+    aircraftMarketOffers.filter(
+      (offer) => offer.market === market,
+    );
+  const manufacturers = [
+    ...new Set(
+      visibleOffers.map(
+        (offer) => offer.manufacturer,
+      ),
+    ),
+  ];
+
+  const requestAcquisition = (
+    offer: AircraftMarketOffer,
+    method: AircraftAcquisitionMethod,
+  ) => {
+    const message =
+      method === "cash"
+        ? `Purchase ${offer.aircraft.model} for ${formatMoney(
+            offer.cashPrice,
+          )} in cash?`
+        : method === "finance"
+          ? `Finance ${offer.aircraft.model} with a ${formatMoney(
+              offer.financeDeposit,
+            )} deposit and ${formatMoney(
+              offer.financeMonthlyPayment,
+            )} per month for ${offer.financeTermMonths} months?`
+          : `Lease ${offer.aircraft.model} from ${offer.provider} for ${formatMoney(
+              offer.monthlyLease,
+            )} per month? The upfront deposit is ${formatMoney(
+              offer.monthlyLease * 3,
+            )}.`;
+
+    if (window.confirm(message)) {
+      onAcquireAircraft(
+        offer.id,
+        method,
+      );
+    }
+  };
 
   return (
     <section className="fleet-page">
+      <div className="fleet-ownership-summary">
+        <article>
+          <span>TOTAL FLEET</span>
+          <strong>{game.fleet.length}</strong>
+        </article>
+        <article>
+          <span>OWNED</span>
+          <strong>{ownedCount}</strong>
+        </article>
+        <article>
+          <span>LEASED</span>
+          <strong>{leasedCount}</strong>
+        </article>
+        <article>
+          <span>UNDER FINANCE</span>
+          <strong>{financedCount}</strong>
+        </article>
+        <article>
+          <span>FLEET VALUE</span>
+          <strong>
+            {formatMoney(fleetValue)}
+          </strong>
+        </article>
+        <article>
+          <span>MONTHLY COMMITMENTS</span>
+          <strong>
+            {formatMoney(monthlyCommitments)}
+          </strong>
+        </article>
+      </div>
+
       <div className="module-grid">
         <article className="panel aircraft-detail">
           {primaryAircraft ? (
@@ -42,15 +155,15 @@ export function FleetView({
                 <div>
                   <span className="panel-eyebrow">
                     {primaryAircraft.registration} ·{" "}
-                    {primaryAircraft.status.toUpperCase()}
+                    {primaryAircraft.acquisitionType.toUpperCase()}
                   </span>
                   <h2>
                     {primaryAircraft.aircraft.model}
                   </h2>
                   <p>
                     {primaryAircraft.aircraft.family} ·{" "}
-                    {primaryAircraft.aircraft.seats} seats ·
-                    Based at {game.hub.code}
+                    {primaryAircraft.aircraft.seats} seats ·{" "}
+                    {primaryAircraft.manufactureYear} airframe
                   </p>
                 </div>
               </div>
@@ -64,10 +177,9 @@ export function FleetView({
                   </strong>
                 </div>
                 <div>
-                  <span>CRUISE SPEED</span>
+                  <span>FLIGHT HOURS</span>
                   <strong>
-                    {primaryAircraft.aircraft.cruiseSpeed.toLocaleString()}{" "}
-                    km/h
+                    {primaryAircraft.flightHours.toLocaleString()}
                   </strong>
                 </div>
                 <div>
@@ -77,11 +189,9 @@ export function FleetView({
                   </strong>
                 </div>
                 <div>
-                  <span>PURCHASE PRICE</span>
+                  <span>STATUS</span>
                   <strong>
-                    {formatMoney(
-                      primaryAircraft.purchasePrice,
-                    )}
+                    {primaryAircraft.status}
                   </strong>
                 </div>
               </div>
@@ -99,9 +209,8 @@ export function FleetView({
                   </span>
                   <h2>No aircraft acquired</h2>
                   <p>
-                    Compare the available aircraft below
-                    and make the airline&apos;s first
-                    capital investment.
+                    Compare manufacturer, used and
+                    lessor offers below.
                   </p>
                 </div>
               </div>
@@ -112,12 +221,12 @@ export function FleetView({
                   <strong>0 aircraft</strong>
                 </div>
                 <div>
-                  <span>FLEET VALUE</span>
-                  <strong>{formatMoney(0)}</strong>
+                  <span>LEASED</span>
+                  <strong>0 aircraft</strong>
                 </div>
                 <div>
-                  <span>MONTHLY LEASES</span>
-                  <strong>{formatMoney(0)}</strong>
+                  <span>FINANCED</span>
+                  <strong>0 aircraft</strong>
                 </div>
                 <div>
                   <span>STATUS</span>
@@ -132,7 +241,7 @@ export function FleetView({
           <div className="panel-heading compact">
             <div>
               <span className="panel-eyebrow">
-                OWNED FLEET
+                OWNED & CONTRACTED FLEET
               </span>
               <h2>Aircraft register</h2>
             </div>
@@ -150,12 +259,12 @@ export function FleetView({
                     {item.registration} ·{" "}
                     {item.aircraft.model}
                   </span>
+
                   <strong>
-                    {item.status === "parked"
-                      ? "Parked"
-                      : item.status === "active"
-                        ? "Active"
-                        : "Maintenance"}
+                    {item.acquisitionType ===
+                    "financed"
+                      ? "Under finance"
+                      : item.acquisitionType}
                   </strong>
                 </div>
               ))
@@ -164,7 +273,7 @@ export function FleetView({
                 <div>
                   <span>
                     <Gauge />
-                    Aircraft owned
+                    Aircraft registered
                   </span>
                   <strong>0</strong>
                 </div>
@@ -181,7 +290,7 @@ export function FleetView({
                     Next fleet event
                   </span>
                   <strong>
-                    Purchase an aircraft
+                    Acquire an aircraft
                   </strong>
                 </div>
               </>
@@ -194,9 +303,9 @@ export function FleetView({
         <div className="panel-heading">
           <div>
             <span className="panel-eyebrow">
-              AIRCRAFT MARKET
+              AIRCRAFT ACQUISITION
             </span>
-            <h2>Purchase aircraft</h2>
+            <h2>Aircraft markets</h2>
           </div>
 
           <div className="fleet-market-cash">
@@ -205,81 +314,275 @@ export function FleetView({
           </div>
         </div>
 
-        <div className="aircraft-market-grid">
-          {aircraft.map((item) => {
-            const purchasePrice =
-              aircraftPurchasePrices[item.model];
-            const affordable =
-              game.cash >= purchasePrice;
+        <div
+          className="aircraft-market-tabs"
+          aria-label="Aircraft markets"
+        >
+          {(
+            Object.keys(
+              marketLabels,
+            ) as AircraftMarket[]
+          ).map((marketId) => (
+            <button
+              type="button"
+              key={marketId}
+              className={
+                market === marketId
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setMarket(marketId)
+              }
+            >
+              <span>
+                {marketLabels[marketId]}
+              </span>
+              <small>
+                {
+                  aircraftMarketOffers.filter(
+                    (offer) =>
+                      offer.market ===
+                      marketId,
+                  ).length
+                }{" "}
+                offers
+              </small>
+            </button>
+          ))}
+        </div>
 
-            return (
-              <article
-                className="aircraft-market-card"
-                key={item.model}
+        <p className="aircraft-market-note">
+          {market === "new"
+            ? "Factory-new aircraft are available for cash purchase or long-term finance."
+            : market === "used"
+              ? "Pre-owned aircraft trade at lower prices, with age, utilisation and condition affecting value."
+              : "Operating leases require a three-month deposit and create a continuing monthly commitment."}
+        </p>
+
+        <div className="manufacturer-groups">
+          {manufacturers.map(
+            (manufacturer) => (
+              <section
+                className="manufacturer-market"
+                key={manufacturer}
               >
-                <div className="market-aircraft-icon">
-                  <Plane />
-                </div>
-
-                <span>{item.family}</span>
-                <h3>{item.model}</h3>
-
-                <dl>
+                <header>
                   <div>
-                    <dt>Seats</dt>
-                    <dd>{item.seats}</dd>
+                    <span>MANUFACTURER</span>
+                    <h3>{manufacturer}</h3>
                   </div>
-                  <div>
-                    <dt>Range</dt>
-                    <dd>
-                      {item.range.toLocaleString()} km
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Cruise</dt>
-                    <dd>
-                      {item.cruiseSpeed.toLocaleString()} km/h
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Reliability</dt>
-                    <dd>{item.reliability}%</dd>
-                  </div>
-                </dl>
+                  <small>
+                    {
+                      visibleOffers.filter(
+                        (offer) =>
+                          offer.manufacturer ===
+                          manufacturer,
+                      ).length
+                    }{" "}
+                    available
+                  </small>
+                </header>
 
-                <div className="aircraft-market-price">
-                  <span>PURCHASE PRICE</span>
-                  <strong>
-                    {formatMoney(purchasePrice)}
-                  </strong>
-                </div>
+                <div className="aircraft-market-grid">
+                  {visibleOffers
+                    .filter(
+                      (offer) =>
+                        offer.manufacturer ===
+                        manufacturer,
+                    )
+                    .map((offer) => {
+                      const cashAffordable =
+                        game.cash >=
+                        offer.cashPrice;
+                      const financeAffordable =
+                        game.cash >=
+                        offer.financeDeposit;
+                      const leaseDeposit =
+                        offer.monthlyLease * 3;
+                      const leaseAffordable =
+                        game.cash >=
+                        leaseDeposit;
 
-                <Button
-                  className="gold-button"
-                  disabled={!affordable}
-                  onClick={() => {
-                    const confirmed =
-                      window.confirm(
-                        `Purchase ${item.model} for ${formatMoney(
-                          purchasePrice,
-                        )}?`,
+                      return (
+                        <article
+                          className="aircraft-market-card"
+                          key={offer.id}
+                        >
+                          <div className="market-aircraft-icon">
+                            <Plane />
+                          </div>
+
+                          <span>
+                            {offer.provider}
+                          </span>
+                          <h3>
+                            {offer.aircraft.model}
+                          </h3>
+
+                          <dl>
+                            <div>
+                              <dt>Seats</dt>
+                              <dd>
+                                {offer.aircraft.seats}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Range</dt>
+                              <dd>
+                                {offer.aircraft.range.toLocaleString()}{" "}
+                                km
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Year</dt>
+                              <dd>
+                                {
+                                  offer.manufactureYear
+                                }
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Flight hours</dt>
+                              <dd>
+                                {offer.flightHours.toLocaleString()}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Condition</dt>
+                              <dd>
+                                {offer.condition}%
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Reliability</dt>
+                              <dd>
+                                {
+                                  offer.aircraft
+                                    .reliability
+                                }
+                                %
+                              </dd>
+                            </div>
+                          </dl>
+
+                          {market === "lessor" ? (
+                            <>
+                              <div className="aircraft-market-price">
+                                <span>
+                                  MONTHLY LEASE
+                                </span>
+                                <strong>
+                                  {formatMoney(
+                                    offer.monthlyLease,
+                                  )}
+                                </strong>
+                                <small>
+                                  Deposit:{" "}
+                                  {formatMoney(
+                                    leaseDeposit,
+                                  )}
+                                </small>
+                              </div>
+
+                              <Button
+                                className="gold-button"
+                                disabled={
+                                  !leaseAffordable
+                                }
+                                onClick={() =>
+                                  requestAcquisition(
+                                    offer,
+                                    "lease",
+                                  )
+                                }
+                              >
+                                <ShoppingCart />
+                                {leaseAffordable
+                                  ? "Lease aircraft"
+                                  : "Deposit unaffordable"}
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <div className="aircraft-market-price">
+                                <span>
+                                  CASH PRICE
+                                </span>
+                                <strong>
+                                  {formatMoney(
+                                    offer.cashPrice,
+                                  )}
+                                </strong>
+                                <small>
+                                  Finance deposit:{" "}
+                                  {formatMoney(
+                                    offer.financeDeposit,
+                                  )}
+                                </small>
+                              </div>
+
+                              <div className="aircraft-acquisition-actions">
+                                <Button
+                                  variant="outline"
+                                  disabled={
+                                    !cashAffordable
+                                  }
+                                  onClick={() =>
+                                    requestAcquisition(
+                                      offer,
+                                      "cash",
+                                    )
+                                  }
+                                >
+                                  {cashAffordable
+                                    ? "Buy cash"
+                                    : "Cash unavailable"}
+                                </Button>
+
+                                <Button
+                                  className="gold-button"
+                                  disabled={
+                                    !financeAffordable
+                                  }
+                                  onClick={() =>
+                                    requestAcquisition(
+                                      offer,
+                                      "finance",
+                                    )
+                                  }
+                                >
+                                  <ShoppingCart />
+                                  {financeAffordable
+                                    ? "Finance"
+                                    : "Deposit unavailable"}
+                                </Button>
+                              </div>
+
+                              <small className="finance-terms">
+                                {formatMoney(
+                                  offer.financeMonthlyPayment,
+                                )}
+                                /month ·{" "}
+                                {
+                                  offer.financeTermMonths
+                                }{" "}
+                                months ·{" "}
+                                {(
+                                  offer.financeAnnualRate *
+                                  100
+                                ).toFixed(1)}
+                                %
+                              </small>
+                            </>
+                          )}
+                        </article>
                       );
-
-                    if (confirmed) {
-                      onPurchaseAircraft(
-                        item.model,
-                      );
-                    }
-                  }}
-                >
-                  <ShoppingCart />
-                  {affordable
-                    ? "Purchase aircraft"
-                    : "Insufficient cash"}
-                </Button>
-              </article>
-            );
-          })}
+                    })}
+                </div>
+              </section>
+            ),
+          )}
         </div>
       </article>
     </section>
