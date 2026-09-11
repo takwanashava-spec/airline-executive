@@ -1,6 +1,7 @@
 import {
   CURRENT_SAVE_VERSION,
   type AirlineState,
+  type FleetAircraft,
 } from "@/types/game";
 
 export const STORAGE_KEY =
@@ -22,6 +23,23 @@ function isFiniteNumber(value: unknown) {
   return (
     typeof value === "number" &&
     Number.isFinite(value)
+  );
+}
+
+function isFleetAircraft(
+  value: unknown,
+): value is FleetAircraft {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.registration === "string" &&
+    isRecord(value.aircraft) &&
+    typeof value.acquiredAt === "string" &&
+    isFiniteNumber(value.purchasePrice) &&
+    isFiniteNumber(value.condition) &&
+    (value.status === "parked" ||
+      value.status === "active" ||
+      value.status === "maintenance")
   );
 }
 
@@ -103,6 +121,35 @@ export function migrateCareer(
       ? value.gameDateTime
       : fallbackGameDate;
 
+  const legacyAircraft = isRecord(
+    value.aircraft,
+  )
+    ? value.aircraft
+    : null;
+  const fleet: FleetAircraft[] =
+    Array.isArray(value.fleet)
+      ? value.fleet.filter(isFleetAircraft)
+      : legacyAircraft
+        ? [
+            {
+              id: "legacy-aircraft-001",
+              registration: `${value.icao}-001`,
+              aircraft:
+                legacyAircraft as unknown as FleetAircraft["aircraft"],
+              acquiredAt: gameDateTime,
+              purchasePrice: 0,
+              condition: isFiniteNumber(
+                value.aircraftCondition,
+              )
+                ? value.aircraftCondition
+                : 100,
+              status: isRecord(value.route)
+                ? "active"
+                : "parked",
+            },
+          ]
+        : [];
+
   return {
     ...(value as unknown as AirlineState),
     saveVersion: CURRENT_SAVE_VERSION,
@@ -119,6 +166,7 @@ export function migrateCareer(
         ? value.updatedAt
         : timestamp,
     gameDateTime,
+    fleet,
     ceoName:
       typeof value.ceoName === "string" &&
       value.ceoName.trim()
