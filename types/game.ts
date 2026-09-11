@@ -5,9 +5,24 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 4;
+export const CURRENT_SAVE_VERSION = 5;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
+
+export type FleetAircraftStatus =
+  | "parked"
+  | "active"
+  | "maintenance";
+
+export type FleetAircraft = {
+  id: string;
+  registration: string;
+  aircraft: Aircraft;
+  acquiredAt: string;
+  purchasePrice: number;
+  condition: number;
+  status: FleetAircraftStatus;
+};
 
 export type View =
   | "overview"
@@ -30,6 +45,7 @@ export type AirlineState = {
   hub: Hub;
   strategy: Strategy;
   aircraft: Aircraft | null;
+  fleet: FleetAircraft[];
   route: RouteSeed | null;
   gameDateTime: string;
   week: number;
