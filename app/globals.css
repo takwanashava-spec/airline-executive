@@ -347,3 +347,194 @@ button:focus-visible,input:focus-visible { outline:3px solid rgba(242,184,75,.45
     align-items: flex-start;
   }
 }
+
+
+/* Aircraft ownership and acquisition markets */
+.fleet-ownership-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .7rem;
+}
+
+.fleet-ownership-summary article {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .38rem;
+  padding: .9rem 1rem;
+  border: 1px solid #dfe5ea;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(20, 38, 59, .04);
+}
+
+.fleet-ownership-summary span {
+  color: #8793a0;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+
+.fleet-ownership-summary strong {
+  overflow: hidden;
+  color: #17283e;
+  font-size: 1.12rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aircraft-market-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .55rem;
+  margin-bottom: .9rem;
+  padding: .35rem;
+  border-radius: 8px;
+  background: #eef2f5;
+}
+
+.aircraft-market-tabs button {
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: .14rem;
+  padding: .7rem .9rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #627184;
+  text-align: left;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.aircraft-market-tabs button:hover {
+  background: rgba(255, 255, 255, .65);
+}
+
+.aircraft-market-tabs button.active {
+  border-color: #d9e0e6;
+  background: #fff;
+  color: #172a42;
+  box-shadow: 0 4px 12px rgba(17, 35, 55, .07);
+}
+
+.aircraft-market-tabs span {
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.aircraft-market-tabs small {
+  color: #8a96a3;
+  font-size: .62rem;
+}
+
+.aircraft-market-note {
+  margin: 0 0 1.2rem;
+  color: #6d7b8b;
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.manufacturer-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.manufacturer-market {
+  overflow: hidden;
+  border: 1px solid #dfe5ea;
+  border-radius: 9px;
+  background: #f8fafb;
+}
+
+.manufacturer-market > header {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 1rem;
+  border-bottom: 1px solid #e1e6ea;
+  background: #fff;
+}
+
+.manufacturer-market > header div {
+  display: flex;
+  align-items: baseline;
+  gap: .65rem;
+}
+
+.manufacturer-market > header span {
+  color: #9a6c22;
+  font-size: .56rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+}
+
+.manufacturer-market > header h3 {
+  margin: 0;
+  color: #17283e;
+  font-size: 1.02rem;
+}
+
+.manufacturer-market > header small {
+  color: #8793a0;
+  font-size: .64rem;
+}
+
+.manufacturer-market .aircraft-market-grid {
+  padding: .85rem;
+}
+
+.aircraft-market-price small {
+  color: #7b8895;
+  font-size: .66rem;
+}
+
+.aircraft-acquisition-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+}
+
+.aircraft-acquisition-actions button {
+  width: 100%;
+}
+
+.finance-terms {
+  min-height: 28px;
+  display: block;
+  padding-top: .55rem;
+  color: #7c8997;
+  font-size: .62rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .fleet-ownership-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .fleet-ownership-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .aircraft-market-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .manufacturer-market > header div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  .aircraft-acquisition-actions {
+    grid-template-columns: 1fr;
+  }
+}
