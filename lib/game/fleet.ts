@@ -1,8 +1,11 @@
 import {
   aircraft,
   aircraftPurchasePrices,
+  type Aircraft,
 } from "@/lib/game-data";
 import type {
+  AircraftAcquisitionType,
+  AircraftMarket,
   AirlineState,
   FleetAircraft,
 } from "@/types/game";
@@ -22,11 +25,244 @@ const REGISTRATION_PREFIXES: Record<
   ZW: "Z",
 };
 
-export type AircraftPurchaseResult = {
+export type AircraftAcquisitionMethod =
+  | "cash"
+  | "finance"
+  | "lease";
+
+export type AircraftMarketOffer = {
+  id: string;
+  market: AircraftMarket;
+  manufacturer: string;
+  aircraft: Aircraft;
+  provider: string;
+  manufactureYear: number;
+  flightHours: number;
+  condition: number;
+  cashPrice: number;
+  monthlyLease: number;
+  financeDeposit: number;
+  financeMonthlyPayment: number;
+  financeTermMonths: number;
+  financeAnnualRate: number;
+};
+
+export type AircraftAcquisitionResult = {
   game: AirlineState;
   aircraft: FleetAircraft | null;
   error: string | null;
 };
+
+function manufacturerOf(model: string) {
+  return model.split(" ")[0];
+}
+
+function aircraftByModel(model: string) {
+  return aircraft.find(
+    (item) => item.model === model,
+  );
+}
+
+function monthlyFinancePayment(
+  principal: number,
+  annualRate: number,
+  months: number,
+) {
+  const monthlyRate = annualRate / 12;
+
+  return Math.round(
+    (principal *
+      monthlyRate *
+      (1 + monthlyRate) ** months) /
+      ((1 + monthlyRate) ** months - 1),
+  );
+}
+
+function financeTerms(
+  price: number,
+  market: "new" | "used",
+) {
+  const depositRate =
+    market === "new" ? 0.2 : 0.25;
+  const annualRate =
+    market === "new" ? 0.085 : 0.105;
+  const months = market === "new" ? 120 : 60;
+  const deposit = Math.round(
+    price * depositRate,
+  );
+  const financedAmount = price - deposit;
+
+  return {
+    deposit,
+    months,
+    annualRate,
+    monthlyPayment: monthlyFinancePayment(
+      financedAmount,
+      annualRate,
+      months,
+    ),
+  };
+}
+
+const usedOfferDetails = [
+  {
+    model: "ATR 72-600",
+    provider: "Regional Aircraft Exchange",
+    manufactureYear: 2018,
+    flightHours: 18_400,
+    condition: 82,
+    cashPrice: 34_000_000,
+  },
+  {
+    model: "Embraer E195-E2",
+    provider: "Continental Aircraft Exchange",
+    manufactureYear: 2021,
+    flightHours: 10_800,
+    condition: 88,
+    cashPrice: 73_000_000,
+  },
+  {
+    model: "Airbus A220-300",
+    provider: "Global Airframe Exchange",
+    manufactureYear: 2022,
+    flightHours: 8_900,
+    condition: 91,
+    cashPrice: 96_000_000,
+  },
+] as const;
+
+const lessorOfferDetails = [
+  {
+    model: "ATR 72-600",
+    provider: "Nordic Regional Leasing",
+    manufactureYear: 2022,
+    flightHours: 6_200,
+    condition: 95,
+  },
+  {
+    model: "Embraer E195-E2",
+    provider: "Horizon Aircraft Leasing",
+    manufactureYear: 2023,
+    flightHours: 4_700,
+    condition: 97,
+  },
+  {
+    model: "Airbus A220-300",
+    provider: "Meridian Aviation Capital",
+    manufactureYear: 2023,
+    flightHours: 4_100,
+    condition: 97,
+  },
+] as const;
+
+const newOffers: AircraftMarketOffer[] =
+  aircraft.map((item) => {
+    const cashPrice =
+      aircraftPurchasePrices[item.model];
+    const finance = financeTerms(
+      cashPrice,
+      "new",
+    );
+
+    return {
+      id: `new-${item.model}`,
+      market: "new",
+      manufacturer: manufacturerOf(
+        item.model,
+      ),
+      aircraft: item,
+      provider: `${manufacturerOf(
+        item.model,
+      )} Commercial Aircraft`,
+      manufactureYear: 2026,
+      flightHours: 0,
+      condition: 100,
+      cashPrice,
+      monthlyLease: 0,
+      financeDeposit: finance.deposit,
+      financeMonthlyPayment:
+        finance.monthlyPayment,
+      financeTermMonths: finance.months,
+      financeAnnualRate:
+        finance.annualRate,
+    };
+  });
+
+const usedOffers: AircraftMarketOffer[] =
+  usedOfferDetails.flatMap((detail) => {
+    const item = aircraftByModel(
+      detail.model,
+    );
+
+    if (!item) return [];
+
+    const finance = financeTerms(
+      detail.cashPrice,
+      "used",
+    );
+
+    return [
+      {
+        id: `used-${item.model}`,
+        market: "used" as const,
+        manufacturer: manufacturerOf(
+          item.model,
+        ),
+        aircraft: item,
+        provider: detail.provider,
+        manufactureYear:
+          detail.manufactureYear,
+        flightHours: detail.flightHours,
+        condition: detail.condition,
+        cashPrice: detail.cashPrice,
+        monthlyLease: 0,
+        financeDeposit: finance.deposit,
+        financeMonthlyPayment:
+          finance.monthlyPayment,
+        financeTermMonths:
+          finance.months,
+        financeAnnualRate:
+          finance.annualRate,
+      },
+    ];
+  });
+
+const lessorOffers: AircraftMarketOffer[] =
+  lessorOfferDetails.flatMap((detail) => {
+    const item = aircraftByModel(
+      detail.model,
+    );
+
+    if (!item) return [];
+
+    return [
+      {
+        id: `lessor-${item.model}`,
+        market: "lessor" as const,
+        manufacturer: manufacturerOf(
+          item.model,
+        ),
+        aircraft: item,
+        provider: detail.provider,
+        manufactureYear:
+          detail.manufactureYear,
+        flightHours: detail.flightHours,
+        condition: detail.condition,
+        cashPrice: 0,
+        monthlyLease: item.monthlyLease,
+        financeDeposit: 0,
+        financeMonthlyPayment: 0,
+        financeTermMonths: 0,
+        financeAnnualRate: 0,
+      },
+    ];
+  });
+
+export const aircraftMarketOffers = [
+  ...newOffers,
+  ...usedOffers,
+  ...lessorOffers,
+];
 
 function createAircraftId() {
   if (
@@ -55,52 +291,88 @@ function createRegistration(
   return `${prefix}-${sequence}`;
 }
 
-export function purchaseAircraft(
+export function acquireAircraft(
   currentGame: AirlineState,
-  model: string,
-): AircraftPurchaseResult {
-  const selectedAircraft = aircraft.find(
-    (item) => item.model === model,
+  offerId: string,
+  method: AircraftAcquisitionMethod,
+): AircraftAcquisitionResult {
+  const offer = aircraftMarketOffers.find(
+    (item) => item.id === offerId,
   );
 
-  if (!selectedAircraft) {
+  if (!offer) {
     return {
       game: currentGame,
       aircraft: null,
-      error: "Aircraft is not available in the market.",
+      error: "Aircraft offer is no longer available.",
     };
   }
 
-  const purchasePrice =
-    aircraftPurchasePrices[
-      selectedAircraft.model
-    ];
+  const methodAllowed =
+    (offer.market === "lessor" &&
+      method === "lease") ||
+    (offer.market !== "lessor" &&
+      (method === "cash" ||
+        method === "finance"));
 
-  if (!Number.isFinite(purchasePrice)) {
+  if (!methodAllowed) {
     return {
       game: currentGame,
       aircraft: null,
-      error: "Aircraft pricing is unavailable.",
+      error: "That acquisition method is not available for this offer.",
     };
   }
 
-  if (currentGame.cash < purchasePrice) {
+  const upfrontCost =
+    method === "cash"
+      ? offer.cashPrice
+      : method === "finance"
+        ? offer.financeDeposit
+        : offer.monthlyLease * 3;
+
+  if (currentGame.cash < upfrontCost) {
     return {
       game: currentGame,
       aircraft: null,
-      error: "The airline does not have enough cash for this purchase.",
+      error: "The airline does not have enough cash for the required upfront payment.",
     };
   }
+
+  const acquisitionType: AircraftAcquisitionType =
+    method === "cash"
+      ? "owned"
+      : method === "finance"
+        ? "financed"
+        : "leased";
+  const monthlyPayment =
+    method === "finance"
+      ? offer.financeMonthlyPayment
+      : method === "lease"
+        ? offer.monthlyLease
+        : 0;
+  const outstandingBalance =
+    method === "finance"
+      ? offer.cashPrice -
+        offer.financeDeposit
+      : 0;
 
   const acquiredAircraft: FleetAircraft = {
     id: createAircraftId(),
     registration:
       createRegistration(currentGame),
-    aircraft: selectedAircraft,
+    aircraft: offer.aircraft,
     acquiredAt: currentGame.gameDateTime,
-    purchasePrice,
-    condition: 100,
+    purchasePrice: offer.cashPrice,
+    condition: offer.condition,
     status: "parked",
+    acquisitionType,
+    market: offer.market,
+    provider: offer.provider,
+    monthlyPayment,
+    outstandingBalance,
+    manufactureYear:
+      offer.manufactureYear,
+    flightHours: offer.flightHours,
   };
 
   return {
@@ -109,16 +381,28 @@ export function purchaseAircraft(
     game: {
       ...currentGame,
       updatedAt: new Date().toISOString(),
-      cash: currentGame.cash - purchasePrice,
+      cash: currentGame.cash - upfrontCost,
       aircraft:
         currentGame.aircraft ??
-        selectedAircraft,
+        offer.aircraft,
       aircraftCondition:
-        currentGame.aircraftCondition || 100,
+        currentGame.aircraftCondition ||
+        offer.condition,
       fleet: [
         ...currentGame.fleet,
         acquiredAircraft,
       ],
     },
   };
+}
+
+export function purchaseAircraft(
+  currentGame: AirlineState,
+  model: string,
+) {
+  return acquireAircraft(
+    currentGame,
+    `new-${model}`,
+    "cash",
+  );
 }
