@@ -44,10 +44,13 @@ export function OpeningMenu({
   const [effects, setEffects] = useState(true);
 
   const careerDate = game
-    ? new Date(2026, 8, 6 + (game.week - 1) * 7).toLocaleDateString("en-ZA", {
+    ? new Date(
+        game.gameDateTime,
+      ).toLocaleDateString("en-ZA", {
         day: "2-digit",
         month: "short",
         year: "numeric",
+        timeZone: "UTC",
       })
     : null;
 
