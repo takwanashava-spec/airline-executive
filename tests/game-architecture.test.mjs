@@ -42,7 +42,7 @@ async function createTestCareer() {
   });
 }
 
-test("registration creates a versioned career without aircraft or routes", async () => {
+test("registration creates a versioned career with a game clock", async () => {
   const career = await createTestCareer();
 
   const { CURRENT_SAVE_VERSION } =
@@ -53,6 +53,10 @@ test("registration creates a versioned career without aircraft or routes", async
     CURRENT_SAVE_VERSION,
   );
   assert.equal(career.week, 1);
+  assert.equal(
+    career.gameDateTime,
+    "2026-09-06T08:00:00.000Z",
+  );
   assert.equal(career.ceoName, "Alex Morgan");
   assert.equal(career.aircraft, null);
   assert.equal(career.route, null);
@@ -63,7 +67,37 @@ test("registration creates a versioned career without aircraft or routes", async
   assert.ok(career.createdAt);
 });
 
-test("weekly simulation stays parked until operations exist", async () => {
+test("game clock advances continuously and closes weeks automatically", async () => {
+  const career = await createTestCareer();
+
+  const { advanceCareerClock } =
+    await vite.ssrLoadModule(
+      "/lib/game/simulation.ts",
+    );
+
+  const oneHourLater = advanceCareerClock(
+    career,
+    60,
+  );
+
+  assert.equal(
+    Date.parse(oneHourLater.gameDateTime) -
+      Date.parse(career.gameDateTime),
+    60 * 60 * 1_000,
+  );
+  assert.equal(oneHourLater.week, 1);
+
+  const oneWeekLater = advanceCareerClock(
+    career,
+    7 * 24 * 60,
+  );
+
+  assert.equal(oneWeekLater.week, 2);
+  assert.equal(oneWeekLater.passengers, 0);
+  assert.equal(oneWeekLater.lastProfit, 0);
+});
+
+test("weekly calendar advances safely before operations exist", async () => {
   const career = await createTestCareer();
 
   const { advanceCareerWeek } =
@@ -73,8 +107,9 @@ test("weekly simulation stays parked until operations exist", async () => {
 
   const result = advanceCareerWeek(career);
 
-  assert.equal(result.game, career);
-  assert.equal(result.week, 1);
+  assert.equal(career.week, 1);
+  assert.equal(result.week, 2);
+  assert.equal(result.game.week, 2);
   assert.equal(result.passengers, 0);
   assert.equal(result.profit, 0);
 });
@@ -114,7 +149,7 @@ test("an existing operational career still advances without mutation", async () 
   );
 });
 
-test("migrates a pre-CEO career with safe profile fallbacks", async () => {
+test("migrates an older career with safe clock and profile fallbacks", async () => {
   const career = await createTestCareer();
 
   const {
@@ -122,6 +157,7 @@ test("migrates a pre-CEO career with safe profile fallbacks", async () => {
     createdAt,
     updatedAt,
     saveVersion,
+    gameDateTime,
     ceoName,
     ceoNationality,
     ceoAge,
@@ -133,6 +169,7 @@ test("migrates a pre-CEO career with safe profile fallbacks", async () => {
   assert.ok(createdAt);
   assert.ok(updatedAt);
   assert.ok(saveVersion);
+  assert.ok(gameDateTime);
   assert.ok(ceoName);
   assert.ok(ceoNationality);
   assert.ok(ceoAge);
@@ -155,6 +192,10 @@ test("migrates a pre-CEO career with safe profile fallbacks", async () => {
   assert.equal(
     migrated.ceoBackground,
     "Airline founder",
+  );
+  assert.equal(
+    migrated.gameDateTime,
+    "2026-09-06T08:00:00.000Z",
   );
   assert.equal(migrated.aircraft, null);
   assert.equal(migrated.route, null);
