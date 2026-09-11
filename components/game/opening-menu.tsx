@@ -222,7 +222,9 @@ export function OpeningMenu({
 
             <div>
               <dt>Fleet</dt>
-              <dd>{game.aircraft ? "1 aircraft" : "0 aircraft"}</dd>
+              <dd>
+                {game.fleet.length} aircraft
+              </dd>
             </div>
 
             <div>
