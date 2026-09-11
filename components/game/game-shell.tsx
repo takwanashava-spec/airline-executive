@@ -40,11 +40,15 @@ export function GameShell({
   game,
   clockSpeed,
   onClockSpeedChange,
+  onPurchaseAircraft,
 }: {
   game: AirlineState;
   clockSpeed: GameSpeed;
   onClockSpeedChange: (
     speed: GameSpeed,
+  ) => void;
+  onPurchaseAircraft: (
+    model: string,
   ) => void;
 }) {
   const [view, setView] = useState<View>("overview");
@@ -248,7 +252,14 @@ export function GameShell({
 
           {view === "overview" && <CommandCentre game={game} />}
           {view === "network" && <NetworkView game={game} />}
-          {view === "fleet" && <FleetView game={game} />}
+          {view === "fleet" && (
+            <FleetView
+              game={game}
+              onPurchaseAircraft={
+                onPurchaseAircraft
+              }
+            />
+          )}
           {view === "finance" && <FinanceView game={game} />}
         </main>
       </div>
