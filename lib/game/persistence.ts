@@ -48,8 +48,10 @@ function hasCoreCareerFields(
     typeof value.icao === "string" &&
     isRecord(value.hub) &&
     isRecord(value.strategy) &&
-    isRecord(value.aircraft) &&
-    isRecord(value.route) &&
+    (value.aircraft === null ||
+      isRecord(value.aircraft)) &&
+    (value.route === null ||
+      isRecord(value.route)) &&
     numberFields.every((field) =>
       isFiniteNumber(value[field]),
     )
