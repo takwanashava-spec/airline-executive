@@ -23,7 +23,7 @@ import { markMessageRead, respondToAuctionMessage, submitAuctionBid } from "@/li
 import { respondToLeaseMessage, submitLeaseApplication } from "@/lib/game/leasing";
 import { applyForUsedAircraftFinance, buyUsedAircraftNow, requestUsedAircraftInspection, respondToUsedAircraftMessage, submitUsedAircraftOffer, toggleUsedAircraftWatchlist } from "@/lib/game/used-aircraft";
 import { performFleetAction, type FleetAction } from "@/lib/game/fleet-operations";
-import { respondToSlotMessage, submitSlotApplication, type RoutePlanInput } from "@/lib/game/routes";
+import { respondToSlotMessage, setRouteSuspended, submitSlotApplication, type RoutePlanInput } from "@/lib/game/routes";
 
 type Screen = "opening" | "setup" | "game" | "exited";
 
@@ -177,11 +177,23 @@ export default function AirlineGame() {
   };
 
   const handleSlotApplication = (input: RoutePlanInput) => {
-    if (!game) return;
+    if (!game) return false;
     const result = submitSlotApplication(game, input);
-    if (result.error) return void toast.error(result.error);
+    if (result.error) {
+      toast.error(result.error);
+      return false;
+    }
     setGame(result.game);
     toast.success("Slot application submitted", { description: "Airport coordination will respond through your inbox within one game day." });
+    return true;
+  };
+
+  const handleRouteSuspended = (routePlanId: string, suspended: boolean) => {
+    if (!game) return;
+    const result = setRouteSuspended(game, routePlanId, suspended);
+    if (result.error) return void toast.error(result.error);
+    setGame(result.game);
+    toast.success(suspended ? "Route suspended" : "Route restored");
   };
 
   if (!loaded) {
@@ -255,6 +267,7 @@ export default function AirlineGame() {
       onUsedWatchlist={(listingId) => setGame(toggleUsedAircraftWatchlist(game, listingId))}
       onFleetAction={handleFleetAction}
       onSubmitSlotApplication={handleSlotApplication}
+      onSetRouteSuspended={handleRouteSuspended}
       onReadMessage={(messageId) => setGame((current) => current ? markMessageRead(current, messageId) : current)}
       onRespondToMessage={handleMessageResponse}
     />

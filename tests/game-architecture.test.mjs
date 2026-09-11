@@ -80,7 +80,7 @@ test("registration creates a versioned career with a game clock", async () => {
 test("route plans receive a slot decision and launch through the inbox", async () => {
   const career = await createTestCareer();
   const { purchaseAircraft } = await vite.ssrLoadModule("/lib/game/fleet.ts");
-  const { processSlotApplications, respondToSlotMessage, submitSlotApplication } = await vite.ssrLoadModule("/lib/game/routes.ts");
+  const { processSlotApplications, respondToSlotMessage, setRouteSuspended, submitSlotApplication, validateRouteSchedule } = await vite.ssrLoadModule("/lib/game/routes.ts");
   const purchased = purchaseAircraft(career, "ATR 72-600").game;
   const ready = {
     ...purchased,
@@ -99,17 +99,28 @@ test("route plans receive a slot decision and launch through the inbox", async (
     passengerDemand: 84,
     coordinates: { x: 54, y: 77 },
   };
-  const submitted = submitSlotApplication(ready, { destination, aircraftId: ready.fleet[0].id, weeklyFlights: 7, baseFare: 1850, departureTime: "08:00", operatingDays: [0, 1, 2, 3, 4, 5, 6] });
+  const schedule = { destination, aircraftId: ready.fleet[0].id, weeklyFlights: 7, baseFare: 1850, departureTime: "08:00", returnDepartureTime: "12:30", turnaroundMinutes: 45, operatingDays: [0, 1, 2, 3, 4, 5, 6] };
+  const submitted = submitSlotApplication(ready, schedule);
   assert.equal(submitted.error, null);
   assert.equal(submitted.game.routePlans[0].status, "slots-pending");
   const decided = processSlotApplications(submitted.game, submitted.game.slotApplications[0].decisionAt);
   assert.equal(decided.slotApplications[0].status, "approved");
-  assert.match(decided.inbox[0].subject, /Slots approved/);
+  assert.match(decided.inbox[0].subject, /rotation approved/i);
   const launched = respondToSlotMessage(decided, decided.inbox[0].id, "accept");
   assert.equal(launched.error, null);
   assert.equal(launched.game.routePlans[0].status, "active");
   assert.equal(launched.game.fleet[0].status, "active");
   assert.equal(launched.game.route.to, "CPT");
+  assert.equal(launched.game.routePlans[0].outboundFlightNumber, `${career.iata}101`);
+  assert.equal(launched.game.routePlans[0].returnFlightNumber, `${career.iata}102`);
+  assert.ok(validateRouteSchedule(launched.game, { ...schedule, weeklyFlights: 1, operatingDays: [0] }).some((issue) => issue.field === "conflict"));
+  const suspended = setRouteSuspended(launched.game, launched.game.routePlans[0].id, true);
+  assert.equal(suspended.error, null);
+  assert.equal(suspended.game.routePlans[0].status, "suspended");
+  assert.equal(suspended.game.fleet[0].status, "parked");
+  const restored = setRouteSuspended(suspended.game, suspended.game.routePlans[0].id, false);
+  assert.equal(restored.error, null);
+  assert.equal(restored.game.routePlans[0].status, "active");
 });
 
 test("fleet induction and maintenance progress on the game clock", async () => {

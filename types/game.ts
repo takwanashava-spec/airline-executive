@@ -5,7 +5,7 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 11;
+export const CURRENT_SAVE_VERSION = 12;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
 
@@ -74,10 +74,14 @@ export type RoutePlan = {
   weeklyFlights: number;
   baseFare: number;
   departureTime: string;
+  returnDepartureTime: string;
+  turnaroundMinutes: number;
+  outboundFlightNumber: string;
+  returnFlightNumber: string;
   operatingDays: number[];
   aircraftId: string;
   createdAt: string;
-  status: "draft" | "slots-pending" | "slots-offered" | "active" | "rejected" | "withdrawn";
+  status: "draft" | "slots-pending" | "slots-offered" | "active" | "suspended" | "rejected" | "withdrawn";
 };
 
 export type SlotApplication = {
@@ -87,7 +91,9 @@ export type SlotApplication = {
   decisionAt: string;
   status: "pending" | "approved" | "countered" | "rejected" | "accepted" | "withdrawn";
   requestedTime: string;
+  requestedReturnTime: string;
   offeredTime?: string;
+  offeredReturnTime?: string;
 };
 
 export type AuctionBid = {

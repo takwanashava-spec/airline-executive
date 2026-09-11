@@ -3,7 +3,7 @@ import { processAuctionDecisions } from "@/lib/game/auctions";
 import { processLeaseDecisions } from "@/lib/game/leasing";
 import { processUsedAircraftTransactions } from "@/lib/game/used-aircraft";
 import { processFleetTasks } from "@/lib/game/fleet-operations";
-import { processSlotApplications } from "@/lib/game/routes";
+import { blockMinutes, processSlotApplications } from "@/lib/game/routes";
 
 export const GAME_MINUTES_PER_REAL_SECOND =
   1 / 60;
@@ -98,7 +98,7 @@ export function advanceCareerWeek(
   const nextWeek = currentGame.week + 1;
 
   const activePlans = currentGame.routePlans.filter((plan) => plan.status === "active");
-  const hasLegacyOperation = currentGame.aircraft && currentGame.route;
+  const hasLegacyOperation = currentGame.routePlans.length === 0 && currentGame.aircraft && currentGame.route;
 
   if (activePlans.length === 0 && !hasLegacyOperation) {
     return {
@@ -199,6 +199,21 @@ export function advanceCareerWeek(
     (nextOnTime < 87 ? 210_000 : 0);
 
   const profit = revenue - costs;
+  const fleet = currentGame.fleet.map((item) => {
+    const weeklyHours = activePlans
+      .filter((plan) => plan.aircraftId === item.id)
+      .reduce((total, plan) => total + (blockMinutes(plan.blockTime) * plan.weeklyFlights * 2) / 60, 0);
+    if (weeklyHours <= 0) return { ...item, utilisationHours: 0 };
+    return {
+      ...item,
+      utilisationHours: Math.round(weeklyHours * 10) / 10,
+      flightHours: Math.round((item.flightHours + weeklyHours) * 10) / 10,
+      flightCycles: (item.flightCycles ?? 0) + activePlans
+        .filter((plan) => plan.aircraftId === item.id)
+        .reduce((total, plan) => total + plan.weeklyFlights * 2, 0),
+      condition: Math.max(45, Math.round((item.condition - weeklyHours * 0.018) * 10) / 10),
+    };
+  });
 
   return {
     week: nextWeek,
@@ -229,6 +244,7 @@ export function advanceCareerWeek(
       lastCosts: costs,
       lastProfit: profit,
       passengers,
+      fleet,
     },
   };
 }

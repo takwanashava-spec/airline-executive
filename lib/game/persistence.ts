@@ -168,6 +168,13 @@ function createCareerId() {
     .slice(2, 10)}`;
 }
 
+function shiftClock(time: unknown, minutes: number) {
+  if (typeof time !== "string" || !/^\d{2}:\d{2}$/.test(time)) return "12:00";
+  const [hours, mins] = time.split(":").map(Number);
+  const total = (hours * 60 + mins + minutes) % 1_440;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 export function migrateCareer(
   value: unknown,
 ): AirlineState | null {
@@ -293,10 +300,20 @@ export function migrateCareer(
       ? (value.fleetTasks as AirlineState["fleetTasks"])
       : [],
     routePlans: Array.isArray(value.routePlans)
-      ? (value.routePlans as AirlineState["routePlans"])
+      ? (value.routePlans as UnknownRecord[]).filter(isRecord).map((plan, index) => ({
+          ...(plan as unknown as AirlineState["routePlans"][number]),
+          returnDepartureTime: typeof plan.returnDepartureTime === "string" ? plan.returnDepartureTime : shiftClock(plan.departureTime, 240),
+          turnaroundMinutes: isFiniteNumber(plan.turnaroundMinutes) ? plan.turnaroundMinutes : 45,
+          outboundFlightNumber: typeof plan.outboundFlightNumber === "string" ? plan.outboundFlightNumber : `${typeof value.iata === "string" ? value.iata : "AE"}${101 + index * 2}`,
+          returnFlightNumber: typeof plan.returnFlightNumber === "string" ? plan.returnFlightNumber : `${typeof value.iata === "string" ? value.iata : "AE"}${102 + index * 2}`,
+        }))
       : [],
     slotApplications: Array.isArray(value.slotApplications)
-      ? (value.slotApplications as AirlineState["slotApplications"])
+      ? (value.slotApplications as UnknownRecord[]).filter(isRecord).map((application) => ({
+          ...(application as unknown as AirlineState["slotApplications"][number]),
+          requestedReturnTime: typeof application.requestedReturnTime === "string" ? application.requestedReturnTime : shiftClock(application.requestedTime, 240),
+          offeredReturnTime: typeof application.offeredReturnTime === "string" ? application.offeredReturnTime : undefined,
+        }))
       : [],
     ceoName:
       typeof value.ceoName === "string" &&

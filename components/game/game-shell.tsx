@@ -56,6 +56,7 @@ export function GameShell({
   onUsedWatchlist,
   onFleetAction,
   onSubmitSlotApplication,
+  onSetRouteSuspended,
   onReadMessage,
   onRespondToMessage,
 }: {
@@ -76,7 +77,8 @@ export function GameShell({
   onUsedBuy: (listingId: string) => void;
   onUsedWatchlist: (listingId: string) => void;
   onFleetAction: (aircraftId: string, action: FleetAction, option?: string) => void;
-  onSubmitSlotApplication: (input: RoutePlanInput) => void;
+  onSubmitSlotApplication: (input: RoutePlanInput) => boolean;
+  onSetRouteSuspended: (routePlanId: string, suspended: boolean) => void;
   onReadMessage: (messageId: string) => void;
   onRespondToMessage: (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => void;
 }) {
@@ -281,7 +283,7 @@ export function GameShell({
           </div>
 
           {view === "overview" && <CommandCentre game={game} />}
-          {view === "network" && <NetworkView game={game} onSubmitSlotApplication={onSubmitSlotApplication} />}
+          {view === "network" && <NetworkView game={game} onSubmitSlotApplication={onSubmitSlotApplication} onSetRouteSuspended={onSetRouteSuspended} />}
           {view === "fleet" && (
             <FleetView
               game={game}
