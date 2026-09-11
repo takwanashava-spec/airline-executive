@@ -1,150 +1,285 @@
 "use client";
 
-import { CalendarDays, Gauge, Plane, ShieldCheck } from "lucide-react";
-import type { CSSProperties } from "react";
+import {
+  CalendarDays,
+  Gauge,
+  Plane,
+  ShieldCheck,
+  ShoppingCart,
+} from "lucide-react";
 
-import { formatMoney } from "@/lib/game-data";
+import { Button } from "@/components/ui/button";
+import {
+  aircraft,
+  aircraftPurchasePrices,
+  formatMoney,
+} from "@/lib/game-data";
 import type { AirlineState } from "@/types/game";
 
-export function FleetView({ game }: { game: AirlineState }) {
-  if (!game.aircraft) {
-    return (
-      <section className="module-grid">
+export function FleetView({
+  game,
+  onPurchaseAircraft,
+}: {
+  game: AirlineState;
+  onPurchaseAircraft: (
+    model: string,
+  ) => void;
+}) {
+  const primaryAircraft =
+    game.fleet[0] ?? null;
+
+  return (
+    <section className="fleet-page">
+      <div className="module-grid">
         <article className="panel aircraft-detail">
-          <div className="aircraft-banner">
-            <div className="plane-large">
-              <Plane />
-            </div>
+          {primaryAircraft ? (
+            <>
+              <div className="aircraft-banner">
+                <div className="plane-large">
+                  <Plane />
+                </div>
 
-            <div>
-              <span className="panel-eyebrow">FLEET DEVELOPMENT</span>
-              <h2>No aircraft acquired</h2>
-              <p>
-                {game.airlineName} begins as a registered company. Aircraft
-                acquisition will happen here inside the game.
-              </p>
-            </div>
-          </div>
+                <div>
+                  <span className="panel-eyebrow">
+                    {primaryAircraft.registration} ·{" "}
+                    {primaryAircraft.status.toUpperCase()}
+                  </span>
+                  <h2>
+                    {primaryAircraft.aircraft.model}
+                  </h2>
+                  <p>
+                    {primaryAircraft.aircraft.family} ·{" "}
+                    {primaryAircraft.aircraft.seats} seats ·
+                    Based at {game.hub.code}
+                  </p>
+                </div>
+              </div>
 
-          <div className="spec-grid">
-            <div>
-              <span>OWNED</span>
-              <strong>0 aircraft</strong>
-            </div>
-            <div>
-              <span>LEASED</span>
-              <strong>0 aircraft</strong>
-            </div>
-            <div>
-              <span>MONTHLY COMMITMENT</span>
-              <strong>{formatMoney(0)}</strong>
-            </div>
-          </div>
+              <div className="spec-grid">
+                <div>
+                  <span>RANGE</span>
+                  <strong>
+                    {primaryAircraft.aircraft.range.toLocaleString()}{" "}
+                    km
+                  </strong>
+                </div>
+                <div>
+                  <span>CRUISE SPEED</span>
+                  <strong>
+                    {primaryAircraft.aircraft.cruiseSpeed.toLocaleString()}{" "}
+                    km/h
+                  </strong>
+                </div>
+                <div>
+                  <span>CONDITION</span>
+                  <strong>
+                    {primaryAircraft.condition.toFixed(1)}%
+                  </strong>
+                </div>
+                <div>
+                  <span>PURCHASE PRICE</span>
+                  <strong>
+                    {formatMoney(
+                      primaryAircraft.purchasePrice,
+                    )}
+                  </strong>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="aircraft-banner">
+                <div className="plane-large">
+                  <Plane />
+                </div>
+
+                <div>
+                  <span className="panel-eyebrow">
+                    FLEET DEVELOPMENT
+                  </span>
+                  <h2>No aircraft acquired</h2>
+                  <p>
+                    Compare the available aircraft below
+                    and make the airline&apos;s first
+                    capital investment.
+                  </p>
+                </div>
+              </div>
+
+              <div className="spec-grid">
+                <div>
+                  <span>OWNED</span>
+                  <strong>0 aircraft</strong>
+                </div>
+                <div>
+                  <span>FLEET VALUE</span>
+                  <strong>{formatMoney(0)}</strong>
+                </div>
+                <div>
+                  <span>MONTHLY LEASES</span>
+                  <strong>{formatMoney(0)}</strong>
+                </div>
+                <div>
+                  <span>STATUS</span>
+                  <strong>Pre-operations</strong>
+                </div>
+              </div>
+            </>
+          )}
         </article>
 
         <article className="panel">
           <div className="panel-heading compact">
             <div>
-              <span className="panel-eyebrow">ACQUISITION</span>
-              <h2>First fleet decision</h2>
+              <span className="panel-eyebrow">
+                OWNED FLEET
+              </span>
+              <h2>Aircraft register</h2>
             </div>
-            <span className="status-on-time">COMING NEXT</span>
+            <span className="fleet-count">
+              {game.fleet.length} aircraft
+            </span>
           </div>
 
           <div className="maintenance-list">
-            <div>
-              <span>
-                <Plane />
-                Review aircraft market
-              </span>
-              <strong>Not yet available</strong>
-            </div>
-            <div>
-              <span>
-                <ShieldCheck />
-                Compare lease and purchase
-              </span>
-              <strong>Not yet available</strong>
-            </div>
+            {game.fleet.length > 0 ? (
+              game.fleet.map((item) => (
+                <div key={item.id}>
+                  <span>
+                    <Plane />
+                    {item.registration} ·{" "}
+                    {item.aircraft.model}
+                  </span>
+                  <strong>
+                    {item.status === "parked"
+                      ? "Parked"
+                      : item.status === "active"
+                        ? "Active"
+                        : "Maintenance"}
+                  </strong>
+                </div>
+              ))
+            ) : (
+              <>
+                <div>
+                  <span>
+                    <Gauge />
+                    Aircraft owned
+                  </span>
+                  <strong>0</strong>
+                </div>
+                <div>
+                  <span>
+                    <ShieldCheck />
+                    Fleet condition
+                  </span>
+                  <strong>Not applicable</strong>
+                </div>
+                <div>
+                  <span>
+                    <CalendarDays />
+                    Next fleet event
+                  </span>
+                  <strong>
+                    Purchase an aircraft
+                  </strong>
+                </div>
+              </>
+            )}
           </div>
         </article>
-      </section>
-    );
-  }
+      </div>
 
-  return (
-    <section className="module-grid">
-      <article className="panel aircraft-detail">
-        <div className="aircraft-banner">
-          <div className="plane-large"><Plane /></div>
-
+      <article className="panel fleet-market-panel">
+        <div className="panel-heading">
           <div>
-            <span className="panel-eyebrow">{game.icao}-001 · ACTIVE</span>
-            <h2>{game.aircraft.model}</h2>
-            <p>
-              {game.aircraft.family} · {game.aircraft.seats} seats · Delivered
-              Aug 2026
-            </p>
+            <span className="panel-eyebrow">
+              AIRCRAFT MARKET
+            </span>
+            <h2>Purchase aircraft</h2>
+          </div>
+
+          <div className="fleet-market-cash">
+            <span>AVAILABLE CASH</span>
+            <strong>{formatMoney(game.cash)}</strong>
           </div>
         </div>
 
-        <div className="spec-grid">
-          <div>
-            <span>RANGE</span>
-            <strong>{game.aircraft.range.toLocaleString()} km</strong>
-          </div>
-          <div>
-            <span>CRUISE SPEED</span>
-            <strong>{game.aircraft.cruiseSpeed.toLocaleString()} km/h</strong>
-          </div>
-          <div>
-            <span>TURNAROUND</span>
-            <strong>{game.aircraft.turnaround} min</strong>
-          </div>
-          <div>
-            <span>RELIABILITY</span>
-            <strong>{game.aircraft.reliability}%</strong>
-          </div>
-          <div>
-            <span>LEASE / MONTH</span>
-            <strong>{formatMoney(game.aircraft.monthlyLease)}</strong>
-          </div>
-        </div>
-      </article>
+        <div className="aircraft-market-grid">
+          {aircraft.map((item) => {
+            const purchasePrice =
+              aircraftPurchasePrices[item.model];
+            const affordable =
+              game.cash >= purchasePrice;
 
-      <article className="panel">
-        <div className="panel-heading compact">
-          <div>
-            <span className="panel-eyebrow">ENGINEERING</span>
-            <h2>Technical condition</h2>
-          </div>
-          <span className="status-on-time">SERVICEABLE</span>
-        </div>
+            return (
+              <article
+                className="aircraft-market-card"
+                key={item.model}
+              >
+                <div className="market-aircraft-icon">
+                  <Plane />
+                </div>
 
-        <div className="health-ring">
-          <div
-            style={
-              { "--health": `${game.aircraftCondition * 3.6}deg` } as CSSProperties
-            }
-          >
-            <span>{game.aircraftCondition.toFixed(1)}%</span>
-            <small>AIRFRAME</small>
-          </div>
-        </div>
+                <span>{item.family}</span>
+                <h3>{item.model}</h3>
 
-        <div className="maintenance-list">
-          <div>
-            <span><Gauge />A-check forecast</span>
-            <strong>184 flight hours</strong>
-          </div>
-          <div>
-            <span><ShieldCheck />Open defects</span>
-            <strong>0 MEL items</strong>
-          </div>
-          <div>
-            <span><CalendarDays />Next inspection</span>
-            <strong>28 Sep 2026</strong>
-          </div>
+                <dl>
+                  <div>
+                    <dt>Seats</dt>
+                    <dd>{item.seats}</dd>
+                  </div>
+                  <div>
+                    <dt>Range</dt>
+                    <dd>
+                      {item.range.toLocaleString()} km
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Cruise</dt>
+                    <dd>
+                      {item.cruiseSpeed.toLocaleString()} km/h
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Reliability</dt>
+                    <dd>{item.reliability}%</dd>
+                  </div>
+                </dl>
+
+                <div className="aircraft-market-price">
+                  <span>PURCHASE PRICE</span>
+                  <strong>
+                    {formatMoney(purchasePrice)}
+                  </strong>
+                </div>
+
+                <Button
+                  className="gold-button"
+                  disabled={!affordable}
+                  onClick={() => {
+                    const confirmed =
+                      window.confirm(
+                        `Purchase ${item.model} for ${formatMoney(
+                          purchasePrice,
+                        )}?`,
+                      );
+
+                    if (confirmed) {
+                      onPurchaseAircraft(
+                        item.model,
+                      );
+                    }
+                  }}
+                >
+                  <ShoppingCart />
+                  {affordable
+                    ? "Purchase aircraft"
+                    : "Insufficient cash"}
+                </Button>
+              </article>
+            );
+          })}
         </div>
       </article>
     </section>
