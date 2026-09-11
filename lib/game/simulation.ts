@@ -11,6 +11,16 @@ export type WeekResult = {
 export function advanceCareerWeek(
   currentGame: AirlineState,
 ): WeekResult {
+  if (!currentGame.aircraft || !currentGame.route) {
+    return {
+      game: currentGame,
+      week: currentGame.week,
+      passengers: 0,
+      loadFactor: 0,
+      profit: 0,
+    };
+  }
+
   const nextWeek = currentGame.week + 1;
 
   const demandWave =
