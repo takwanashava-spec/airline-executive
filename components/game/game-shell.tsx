@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   Menu,
   Plane,
-  Clock3,
   Route,
   Settings,
   Users,
@@ -24,7 +23,11 @@ import { FleetView } from "@/components/game/fleet-view";
 import { NetworkView } from "@/components/game/network-view";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import type { AirlineState, View } from "@/types/game";
+import type {
+  AirlineState,
+  GameSpeed,
+  View,
+} from "@/types/game";
 
 const navItems = [
   { id: "overview" as View, label: "Command centre", icon: LayoutDashboard },
@@ -35,20 +38,41 @@ const navItems = [
 
 export function GameShell({
   game,
+  clockSpeed,
+  onClockSpeedChange,
 }: {
   game: AirlineState;
+  clockSpeed: GameSpeed;
+  onClockSpeedChange: (
+    speed: GameSpeed,
+  ) => void;
 }) {
   const [view, setView] = useState<View>("overview");
   const [mobileNav, setMobileNav] = useState(false);
-  const gameDate = useMemo(
-    () =>
-      new Date(2026, 8, 6 + (game.week - 1) * 7).toLocaleDateString("en-ZA", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-    [game.week],
-  );
+  const { gameDate, gameTime } = useMemo(() => {
+    const date = new Date(game.gameDateTime);
+
+    return {
+      gameDate: date.toLocaleDateString(
+        "en-ZA",
+        {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC",
+        },
+      ),
+      gameTime: date.toLocaleTimeString(
+        "en-ZA",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: "UTC",
+        },
+      ),
+    };
+  }, [game.gameDateTime]);
 
   return (
     <div className="game-shell">
@@ -141,13 +165,47 @@ export function GameShell({
             <div className="sim-date">
               <CalendarDays />
               <span>WEEK {game.week}</span>
-              <strong>{gameDate}</strong>
+              <strong>
+                {gameDate} · {gameTime}
+              </strong>
             </div>
 
-            <Button className="advance-button" disabled>
-              <Clock3 />
-              Real-time clock coming next
-            </Button>
+            <div
+              className="speed-control"
+              aria-label="Game clock speed"
+            >
+              <button
+                type="button"
+                aria-label="Pause game clock"
+                className={
+                  clockSpeed === 0 ? "active" : ""
+                }
+                onClick={() =>
+                  onClockSpeedChange(0)
+                }
+              >
+                Ⅱ
+              </button>
+
+              {([1, 2, 4] as const).map(
+                (speed) => (
+                  <button
+                    type="button"
+                    key={speed}
+                    className={
+                      clockSpeed === speed
+                        ? "active"
+                        : ""
+                    }
+                    onClick={() =>
+                      onClockSpeedChange(speed)
+                    }
+                  >
+                    {speed}×
+                  </button>
+                ),
+              )}
+            </div>
           </div>
         </header>
 
