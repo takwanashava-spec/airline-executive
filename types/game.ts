@@ -7,7 +7,7 @@ import type {
 
 export const CURRENT_SAVE_VERSION = 4;
 
-export type GameSpeed = 0 | 1 | 2 | 4;
+export type GameSpeed = 0 | 1 | 60 | 360;
 
 export type View =
   | "overview"
