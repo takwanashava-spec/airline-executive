@@ -10,7 +10,8 @@ import { GameShell } from "@/components/game/game-shell";
 import { OpeningMenu } from "@/components/game/opening-menu";
 import { Toaster } from "@/components/ui/sonner";
 import {
-  purchaseAircraft,
+  acquireAircraft,
+  type AircraftAcquisitionMethod,
 } from "@/lib/game/fleet";
 import { loadCareer, saveCareer } from "@/lib/game/persistence";
 import {
@@ -86,28 +87,39 @@ export default function AirlineGame() {
     };
   }, [clockSpeed, screen]);
 
-  const handlePurchaseAircraft = (
-    model: string,
+  const handleAcquireAircraft = (
+    offerId: string,
+    method: AircraftAcquisitionMethod,
   ) => {
     if (!game) return;
 
-    const result = purchaseAircraft(
+    const result = acquireAircraft(
       game,
-      model,
+      offerId,
+      method,
     );
 
     if (result.error || !result.aircraft) {
       toast.error(
         result.error ??
-          "The aircraft could not be purchased.",
+          "The aircraft could not be acquired.",
       );
       return;
     }
 
     setGame(result.game);
 
+    const action =
+      result.aircraft.acquisitionType ===
+      "leased"
+        ? "leased"
+        : result.aircraft.acquisitionType ===
+            "financed"
+          ? "financed"
+          : "purchased";
+
     toast.success(
-      `${result.aircraft.aircraft.model} purchased`,
+      `${result.aircraft.aircraft.model} ${action}`,
       {
         description: `${result.aircraft.registration} has joined the fleet at ${game.hub.code}.`,
       },
@@ -173,8 +185,8 @@ export default function AirlineGame() {
       game={game}
       clockSpeed={clockSpeed}
       onClockSpeedChange={setClockSpeed}
-      onPurchaseAircraft={
-        handlePurchaseAircraft
+      onAcquireAircraft={
+        handleAcquireAircraft
       }
     />
   );
