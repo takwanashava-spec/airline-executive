@@ -829,7 +829,7 @@ export function FleetView({
           )}
             </div>
           </>
-        )}
+        )
         )}
       </article>
     </section>
