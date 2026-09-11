@@ -147,9 +147,22 @@ export function advanceCareerWeek(
     10.8 *
     (fuelIndex / 100);
 
+  const ownedPrimaryAircraft =
+    currentGame.fleet.find(
+      (item) =>
+        item.aircraft.model ===
+          currentGame.aircraft?.model &&
+        item.purchasePrice > 0,
+    );
+  const weeklyLeaseCost =
+    ownedPrimaryAircraft
+      ? 0
+      : currentGame.aircraft.monthlyLease /
+        4.33;
+
   const costs =
     fuelCost +
-    currentGame.aircraft.monthlyLease / 4.33 +
+    weeklyLeaseCost +
     sectors * 31_000 +
     690_000 +
     (nextOnTime < 87 ? 210_000 : 0);
