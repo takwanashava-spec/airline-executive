@@ -7,10 +7,8 @@ import {
   Building2,
   Check,
   Clock3,
-  Fuel,
   Layers3,
   MapPin,
-  Plane,
   PlaneTakeoff,
   Search,
   ShieldCheck,
@@ -22,18 +20,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  aircraft,
   formatMoney,
   hubs,
-  routeSeeds,
   strategies,
   type Hub,
-  type RouteSeed,
   type Strategy,
 } from "@/lib/game-data";
 import {
-  buildStarterRoutes,
-  calculateBlockTime,
   formatAnnualTraffic,
   searchAirports,
 } from "@/lib/airport-system";
@@ -64,33 +57,8 @@ export function FounderSetup({
   const [hubSearchBusy, setHubSearchBusy] = useState(false);
   const [strategyId, setStrategyId] =
     useState<Strategy["id"]>("network");
-  const [aircraftModel, setAircraftModel] =
-    useState("Embraer E195-E2");
-  const [routeCode, setRouteCode] = useState("CPT");
-  const [availableRoutes, setAvailableRoutes] = useState<RouteSeed[]>(
-    routeSeeds.JNB,
-  );
-  const [routesLoading, setRoutesLoading] = useState(false);
-
   const strategy =
     strategies.find((item) => item.id === strategyId) ?? strategies[1];
-
-  const selectedAircraft =
-    aircraft.find((item) => item.model === aircraftModel) ?? aircraft[1];
-
-  const baseRoute =
-    availableRoutes.find((item) => item.to === routeCode) ??
-    availableRoutes[0] ??
-    routeSeeds.JNB[0];
-
-  const route: RouteSeed = {
-    ...baseRoute,
-    blockTime: calculateBlockTime(
-      baseRoute.distance,
-      selectedAircraft.cruiseSpeed,
-      hub.slotPressure,
-    ),
-  };
 
   useEffect(() => {
     if (!hubSearchOpen) return;
@@ -123,41 +91,7 @@ export function FounderSetup({
     };
   }, [hubQuery, hubSearchOpen, hub.code, hub.name]);
 
-  useEffect(() => {
-    const presetRoutes = routeSeeds[hub.code];
-
-    if (presetRoutes) return;
-
-    let cancelled = false;
-
-    buildStarterRoutes(hub).then((routes) => {
-      if (cancelled) return;
-
-      setAvailableRoutes(routes);
-
-      if (routes[0]) {
-        setRouteCode(routes[0].to);
-      }
-
-      setRoutesLoading(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [hub]);
-
   const selectHub = (selectedHub: Hub) => {
-    const presetRoutes = routeSeeds[selectedHub.code];
-
-    if (presetRoutes) {
-      setAvailableRoutes(presetRoutes);
-      setRouteCode(presetRoutes[0].to);
-      setRoutesLoading(false);
-    } else {
-      setRoutesLoading(true);
-    }
-
     setHub(selectedHub);
     setHubQuery(`${selectedHub.code} · ${selectedHub.name}`);
     setHubSearchOpen(false);
@@ -176,8 +110,6 @@ export function FounderSetup({
         icao,
         hub,
         strategy,
-        aircraft: selectedAircraft,
-        route,
       }),
     );
   };
@@ -193,17 +125,15 @@ export function FounderSetup({
           <h1>Build an airline the world remembers.</h1>
 
           <p>
-            Every seat, slot and decision matters. Establish your
-            headquarters, define the business and put your first aircraft into
-            service.
+            Register the company, establish its headquarters and define the
+            operating model. Fleet and network decisions begin inside the game.
           </p>
         </div>
 
         <div className="setup-steps">
           {[
-            [1, "Corporate identity", "Name, codes and headquarters"],
-            [2, "Operating model", "Strategy and first aircraft"],
-            [3, "Launch network", "Open your first route"],
+            [1, "Airline registration", "Executive, airline and headquarters"],
+            [2, "Operating model", "Choose how the company competes"],
           ].map(([number, title, detail]) => (
             <button
               key={number}
@@ -237,12 +167,12 @@ export function FounderSetup({
 
       <main className="setup-panel">
         <div className="setup-progress">
-          <span style={{ width: `${(step / 3) * 100}%` }} />
+          <span style={{ width: `${(step / 2) * 100}%` }} />
         </div>
 
         {step === 1 && (
           <section className="setup-content hub-setup-content">
-            <div className="section-number">01 / 03</div>
+            <div className="section-number">01 / 02</div>
 
             <h2>Build your corporate identity</h2>
 
@@ -251,7 +181,7 @@ export function FounderSetup({
               coded airport as your headquarters.
             </p>
 
-                        <div className="form-grid">
+            <div className="form-grid">
               <div className="field full">
                 <Label htmlFor="ceo-name">Chief executive name</Label>
 
@@ -589,13 +519,13 @@ export function FounderSetup({
 
         {step === 2 && (
           <section className="setup-content wide">
-            <div className="section-number">02 / 03</div>
+            <div className="section-number">02 / 02</div>
 
             <h2>Choose your operating model</h2>
 
             <p className="setup-lead">
-              Your strategy influences available capital, passenger demand and
-              ticket yield.
+              Choose the commercial model that will define your starting
+              capital and guide future fleet and network decisions.
             </p>
 
             <div className="choice-grid strategy-grid">
@@ -643,213 +573,44 @@ export function FounderSetup({
               ))}
             </div>
 
-            <div className="subhead">
-              <div>
-                <span>FIRST AIRCRAFT</span>
-                <strong>
-                  Operating lease · 36 months
-                </strong>
-              </div>
+            <article className="launch-summary">
+              <p className="eyebrow">REGISTRATION SUMMARY</p>
+              <h3>{name || "Your airline"}</h3>
 
-              <Fuel />
-            </div>
-
-            <div className="aircraft-choice-list">
-              {aircraft.map((item) => (
-                <button
-                  key={item.model}
-                  className={`aircraft-choice ${
-                    aircraftModel === item.model
-                      ? "selected"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    setAircraftModel(item.model)
-                  }
-                >
-                  <span className="aircraft-radio" />
-
-                  <div className="plane-silhouette">
-                    <Plane />
-                  </div>
-
-                  <div className="aircraft-title">
-                    <strong>{item.model}</strong>
-                    <span>{item.family}</span>
-                  </div>
-
-                  <div>
-                    <small>SEATS</small>
-                    <strong>{item.seats}</strong>
-                  </div>
-
-                  <div>
-                    <small>RANGE</small>
-                    <strong>
-                      {item.range.toLocaleString()} km
-                    </strong>
-                  </div>
-
-                  <div>
-                    <small>CRUISE SPEED</small>
-                    <strong>
-                      {item.cruiseSpeed.toLocaleString()} km/h
-                    </strong>
-                  </div>
-
-                  <div>
-                    <small>LEASE / MO</small>
-                    <strong>
-                      {formatMoney(item.monthlyLease)}
-                    </strong>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {step === 3 && (
-          <section className="setup-content wide">
-            <div className="section-number">03 / 03</div>
-
-            <h2>Open your first route</h2>
-
-            <p className="setup-lead">
-              Select the market that will define your airline’s opening
-              chapter.
-            </p>
-
-            <div className="launch-layout">
-              <div className="route-options">
-                {routesLoading ? (
-                  <div className="route-researching">
-                    <span className="airport-search-spinner" />
-
-                    <strong>
-                      Analysing markets around {hub.code}
-                    </strong>
-
-                    <small>
-                      Building realistic starter routes from the selected hub…
-                    </small>
-                  </div>
-                ) : availableRoutes.length > 0 ? (
-                  availableRoutes.map((item) => (
-                    <button
-                      key={item.to}
-                      className={`route-option ${
-                        routeCode === item.to ? "selected" : ""
-                      }`}
-                      onClick={() => setRouteCode(item.to)}
-                    >
-                      <span className="route-code">
-                        {hub.code}
-                        <ArrowRight />
-                        {item.to}
-                      </span>
-
-                      <div>
-                        <strong>{item.city}</strong>
-
-                        <small>
-                          {item.distance.toLocaleString()} km ·{" "}
-                          {calculateBlockTime(
-                            item.distance,
-                            selectedAircraft.cruiseSpeed,
-                            hub.slotPressure,
-                          )}
-                        </small>
-                      </div>
-
-                      <div className="demand-meter">
-                        <span>DEMAND</span>
-                        <b>{item.demand}</b>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="route-researching">
-                    <strong>
-                      No scheduled markets found
-                    </strong>
-
-                    <small>
-                      Return to Corporate Identity and choose an airport with
-                      scheduled service.
-                    </small>
-                  </div>
-                )}
-              </div>
-
-              <div className="launch-summary">
-                <p className="eyebrow">LAUNCH BRIEF</p>
-                <h3>{name || "Your airline"}</h3>
-
-                <div className="summary-route">
-                  <span>{hub.code}</span>
-
-                  <div>
-                    <Plane />
-                    <i />
-                  </div>
-
-                  <span>{route.to}</span>
+              <dl>
+                <div>
+                  <dt>Chief executive</dt>
+                  <dd>{ceoName}</dd>
                 </div>
 
-                <dl>
-                  <div>
-                    <dt>Aircraft</dt>
-                    <dd>{selectedAircraft.model}</dd>
-                  </div>
+                <div>
+                  <dt>Headquarters</dt>
+                  <dd>
+                    {hub.code} · {hub.city}
+                  </dd>
+                </div>
 
-                  <div>
-                    <dt>Route distance</dt>
-                    <dd>
-                      {route.distance.toLocaleString()} km
-                    </dd>
-                  </div>
+                <div>
+                  <dt>Operating model</dt>
+                  <dd>{strategy.name}</dd>
+                </div>
 
-                  <div>
-                    <dt>Block time</dt>
-                    <dd>{route.blockTime}</dd>
-                  </div>
+                <div>
+                  <dt>Opening capital</dt>
+                  <dd>{formatMoney(strategy.capital)}</dd>
+                </div>
 
-                  <div>
-                    <dt>Weekly rotations</dt>
-                    <dd>{route.weeklyFlights}</dd>
-                  </div>
+                <div>
+                  <dt>Fleet at registration</dt>
+                  <dd>0 aircraft</dd>
+                </div>
 
-                  <div>
-                    <dt>Opening cash</dt>
-
-                    <dd>
-                      {formatMoney(
-                        strategy.capital -
-                          selectedAircraft.monthlyLease * 3 -
-                          4_800_000,
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt>Expected load factor</dt>
-
-                    <dd>
-                      {Math.round(
-                        Math.min(
-                          84,
-                          route.demand *
-                            0.76 *
-                            strategy.demandMultiplier,
-                        ),
-                      )}
-                      %
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
+                <div>
+                  <dt>Network at registration</dt>
+                  <dd>0 routes</dd>
+                </div>
+              </dl>
+            </article>
           </section>
         )}
 
@@ -865,11 +626,11 @@ export function FounderSetup({
             {step === 1 ? "Main menu" : "Back"}
           </Button>
 
-          {step < 3 ? (
+          {step < 2 ? (
             <Button
               className="gold-button"
               onClick={() => setStep(step + 1)}
-                disabled={
+              disabled={
                 !ceoName.trim() ||
                 !ceoNationality.trim() ||
                 ceoAge < 18 ||
@@ -886,12 +647,8 @@ export function FounderSetup({
             <Button
               className="gold-button"
               onClick={launch}
-              disabled={
-                routesLoading ||
-                availableRoutes.length === 0
-              }
             >
-              Launch airline <PlaneTakeoff />
+              Register airline <PlaneTakeoff />
             </Button>
           )}
         </footer>

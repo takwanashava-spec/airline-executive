@@ -9,7 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   Plane,
-  Play,
+  Clock3,
   Route,
   Settings,
   Users,
@@ -35,14 +35,11 @@ const navItems = [
 
 export function GameShell({
   game,
-  onAdvanceWeek,
 }: {
   game: AirlineState;
-  onAdvanceWeek: () => void;
 }) {
   const [view, setView] = useState<View>("overview");
   const [mobileNav, setMobileNav] = useState(false);
-  const [speed, setSpeed] = useState(1);
   const gameDate = useMemo(
     () =>
       new Date(2026, 8, 6 + (game.week - 1) * 7).toLocaleDateString("en-ZA", {
@@ -147,26 +144,9 @@ export function GameShell({
               <strong>{gameDate}</strong>
             </div>
 
-            <div className="speed-control">
-              <button
-                className={speed === 0 ? "active" : ""}
-                onClick={() => setSpeed(0)}
-              >
-                Ⅱ
-              </button>
-              {[1, 2, 4].map((item) => (
-                <button
-                  key={item}
-                  className={speed === item ? "active" : ""}
-                  onClick={() => setSpeed(item)}
-                >
-                  {item}×
-                </button>
-              ))}
-            </div>
-
-            <Button className="advance-button" onClick={onAdvanceWeek}>
-              <Play />Advance 7 days
+            <Button className="advance-button" disabled>
+              <Clock3 />
+              Real-time clock coming next
             </Button>
           </div>
         </header>
@@ -177,12 +157,14 @@ export function GameShell({
               <span className="dashboard-kicker">FOUNDER CAREER · YEAR 1</span>
               <h1>
                 {view === "overview"
-                  ? "Good evening, Chief Executive."
+                  ? `Good evening, ${game.ceoName}.`
                   : navItems.find((item) => item.id === view)?.label}
               </h1>
               <p>
                 {view === "overview"
-                  ? `Operations are stable at ${game.hub.name}. Here is your latest executive picture.`
+                  ? game.route
+                    ? `Operations are stable at ${game.hub.name}. Here is your latest executive picture.`
+                    : `${game.airlineName} is registered at ${game.hub.name}. Build your fleet and network from inside the game.`
                   : `Week ${game.week} · ${game.hub.code} headquarters`}
               </p>
             </div>

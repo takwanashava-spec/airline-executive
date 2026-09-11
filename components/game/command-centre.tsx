@@ -46,6 +46,41 @@ export function MetricCard({
 }
 
 export function RouteMap({ game }: { game: AirlineState }) {
+  if (!game.route) {
+    return (
+      <div
+        className="network-map"
+        aria-label={`Network map centred on ${game.hub.code}`}
+      >
+        <div className="map-grid" />
+        <div className="map-orbit orbit-one" />
+        <div className="map-orbit orbit-two" />
+
+        <div
+          className="map-node hub-node"
+          style={{
+            left: `${game.hub.coordinates.x}%`,
+            top: `${game.hub.coordinates.y}%`,
+          }}
+        >
+          <i />
+          <span>{game.hub.code}</span>
+        </div>
+
+        <div className="map-label north-america">NORTH AMERICA</div>
+        <div className="map-label europe">EUROPE</div>
+        <div className="map-label africa">AFRICA</div>
+        <div className="map-label asia">ASIA PACIFIC</div>
+
+        <div className="weather-chip">
+          <CloudSun />
+          <span>Hub weather</span>
+          <b>22°C</b>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="network-map"
@@ -141,6 +176,133 @@ export function RouteMap({ game }: { game: AirlineState }) {
 }
 
 export function CommandCentre({ game }: { game: AirlineState }) {
+  if (!game.aircraft || !game.route) {
+    return (
+      <>
+        <section className="metric-grid">
+          <MetricCard
+            label="Cash position"
+            value={formatMoney(game.cash)}
+            change="Available for company setup"
+            icon={WalletCards}
+            tone="positive"
+          />
+
+          <MetricCard
+            label="Weekly passengers"
+            value="0"
+            change="No routes are operating"
+            icon={Users}
+          />
+
+          <MetricCard
+            label="Fleet"
+            value="0 aircraft"
+            change="Aircraft acquisition is your next decision"
+            icon={Plane}
+          />
+
+          <MetricCard
+            label="Airline reputation"
+            value={`${game.reputation}/100`}
+            change="Newly registered airline"
+            icon={Sparkles}
+          />
+        </section>
+
+        <section className="command-grid">
+          <article className="panel network-panel">
+            <div className="panel-heading">
+              <div>
+                <span className="panel-eyebrow">REGISTERED HEADQUARTERS</span>
+                <h2>{game.hub.code} command base</h2>
+              </div>
+
+              <span className="status-on-time">NO ACTIVE ROUTES</span>
+            </div>
+
+            <RouteMap game={game} />
+
+            <div className="route-live-row">
+              <div className="route-flight-no">
+                <span>FOUNDATION PHASE</span>
+                <strong>{game.airlineName} is ready to build</strong>
+              </div>
+
+              <div>
+                <small>FLEET</small>
+                <strong>0 aircraft</strong>
+              </div>
+
+              <div>
+                <small>NETWORK</small>
+                <strong>0 routes</strong>
+              </div>
+
+              <span className="status-on-time">REGISTERED</span>
+            </div>
+          </article>
+
+          <article className="panel brief-panel">
+            <div className="panel-heading">
+              <div>
+                <span className="panel-eyebrow">FOUNDER BRIEF</span>
+                <h2>Your next decisions</h2>
+              </div>
+
+              <span className="brief-count">2</span>
+            </div>
+
+            <div className="brief-list">
+              <button disabled>
+                <span className="brief-icon blue">
+                  <Plane />
+                </span>
+
+                <div>
+                  <strong>Acquire your first aircraft</strong>
+                  <p>
+                    Build the fleet from inside the game instead of during
+                    registration.
+                  </p>
+                </div>
+
+                <ChevronRight />
+              </button>
+
+              <button disabled>
+                <span className="brief-icon green">
+                  <TrendingUp />
+                </span>
+
+                <div>
+                  <strong>Research and open a route</strong>
+                  <p>
+                    Your network will begin after an aircraft is available.
+                  </p>
+                </div>
+
+                <ChevronRight />
+              </button>
+            </div>
+
+            <div className="board-objective">
+              <span>FOUNDATION OBJECTIVE</span>
+
+              <div>
+                <strong>Launch the first scheduled service</strong>
+                <b>0%</b>
+              </div>
+
+              <Progress value={0} />
+              <small>Fleet acquisition and route opening come next</small>
+            </div>
+          </article>
+        </section>
+      </>
+    );
+  }
+
   return (
     <>
       <section className="metric-grid">

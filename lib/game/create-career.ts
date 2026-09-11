@@ -1,7 +1,5 @@
 import type {
-  Aircraft,
   Hub,
-  RouteSeed,
   Strategy,
 } from "@/lib/game-data";
 import {
@@ -19,8 +17,6 @@ export type CreateCareerInput = {
   icao: string;
   hub: Hub;
   strategy: Strategy;
-  aircraft: Aircraft;
-  route: RouteSeed;
 };
 
 function createCareerId() {
@@ -46,48 +42,7 @@ export function createInitialCareer({
   icao,
   hub,
   strategy,
-  aircraft,
-  route,
 }: CreateCareerInput): AirlineState {
-  const initialCash =
-    strategy.capital -
-    aircraft.monthlyLease * 3 -
-    4_800_000;
-
-  const initialLoad = Math.round(
-    Math.min(
-      84,
-      route.demand *
-        0.76 *
-        strategy.demandMultiplier,
-    ),
-  );
-
-  const sectors = route.weeklyFlights * 2;
-
-  const passengers = Math.round(
-    sectors *
-      aircraft.seats *
-      (initialLoad / 100),
-  );
-
-  const revenue =
-    passengers *
-    route.baseFare *
-    strategy.fareMultiplier;
-
-  const variable =
-    sectors *
-    route.distance *
-    aircraft.fuelBurn *
-    10.8;
-
-  const costs =
-    variable +
-    aircraft.monthlyLease / 4.33 +
-    sectors * 31_000 +
-    690_000;
-
   const timestamp = new Date().toISOString();
 
   return {
@@ -105,18 +60,18 @@ export function createInitialCareer({
     icao: icao.toUpperCase(),
     hub,
     strategy,
-    aircraft,
-    route,
+    aircraft: null,
+    route: null,
     week: 1,
-    cash: initialCash,
+    cash: strategy.capital,
     reputation: 50,
-    loadFactor: initialLoad,
-    onTime: 91.4,
-    aircraftCondition: 100,
+    loadFactor: 0,
+    onTime: 100,
+    aircraftCondition: 0,
     fuelIndex: 104.6,
-    lastRevenue: revenue,
-    lastCosts: costs,
-    lastProfit: revenue - costs,
-    passengers,
+    lastRevenue: 0,
+    lastCosts: 0,
+    lastProfit: 0,
+    passengers: 0,
   };
 }

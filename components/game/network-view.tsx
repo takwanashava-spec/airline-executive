@@ -8,7 +8,8 @@ import { routeSeeds } from "@/lib/game-data";
 import type { AirlineState } from "@/types/game";
 
 export function NetworkView({ game }: { game: AirlineState }) {
-  const marketRoutes = routeSeeds[game.hub.code] ?? [game.route];
+  const marketRoutes = routeSeeds[game.hub.code] ?? [];
+  const activeRoute = game.route;
 
   return (
     <section className="module-grid">
@@ -19,7 +20,9 @@ export function NetworkView({ game }: { game: AirlineState }) {
             <h2>{game.hub.city} hub strategy</h2>
           </div>
 
-          <span className="status-on-time">1 ACTIVE ROUTE</span>
+          <span className="status-on-time">
+            {activeRoute ? "1 ACTIVE ROUTE" : "0 ACTIVE ROUTES"}
+          </span>
         </div>
 
         <RouteMap game={game} />
@@ -29,46 +32,57 @@ export function NetworkView({ game }: { game: AirlineState }) {
         <div className="panel-heading compact">
           <div>
             <span className="panel-eyebrow">MARKET SCREEN</span>
-            <h2>Expansion candidates</h2>
+            <h2>
+              {activeRoute ? "Expansion candidates" : "Future route research"}
+            </h2>
           </div>
         </div>
 
-        {marketRoutes.map((route) => (
-          <div
-            className={`market-row ${
-              route.to === game.route.to ? "active" : ""
-            }`}
-            key={route.to}
-          >
-            <span className="airport-pair">
-              {route.from}
-              <ArrowRight />
-              {route.to}
-            </span>
+        {marketRoutes.length > 0 ? (
+          marketRoutes.map((route) => {
+            const isActive = route.to === activeRoute?.to;
 
-            <div>
-              <strong>{route.city}</strong>
-              <small>
-                {route.distance.toLocaleString()} km · {route.blockTime}
-              </small>
-            </div>
+            return (
+              <div
+                className={`market-row ${isActive ? "active" : ""}`}
+                key={route.to}
+              >
+                <span className="airport-pair">
+                  {route.from}
+                  <ArrowRight />
+                  {route.to}
+                </span>
 
-            <div className="market-score">
-              <span>DEMAND</span>
-              <b>{route.demand}</b>
-            </div>
+                <div>
+                  <strong>{route.city}</strong>
+                  <small>
+                    {route.distance.toLocaleString()} km · {route.blockTime}
+                  </small>
+                </div>
 
-            <Button
-              variant={
-                route.to === game.route.to ? "secondary" : "outline"
-              }
-              size="sm"
-              disabled
-            >
-              {route.to === game.route.to ? "Operating" : "Research"}
-            </Button>
+                <div className="market-score">
+                  <span>DEMAND</span>
+                  <b>{route.demand}</b>
+                </div>
+
+                <Button
+                  variant={isActive ? "secondary" : "outline"}
+                  size="sm"
+                  disabled
+                >
+                  {isActive ? "Operating" : "Research soon"}
+                </Button>
+              </div>
+            );
+          })
+        ) : (
+          <div className="route-researching">
+            <strong>No markets researched yet</strong>
+            <small>
+              Route research will be unlocked as the gameplay foundation grows.
+            </small>
           </div>
-        ))}
+        )}
       </article>
     </section>
   );

@@ -21,7 +21,7 @@ after(async () => {
 });
 
 async function createTestCareer() {
-  const { aircraft, hubs, routeSeeds, strategies } =
+  const { hubs, strategies } =
     await vite.ssrLoadModule("/lib/game-data.ts");
 
   const { createInitialCareer } =
@@ -39,21 +39,14 @@ async function createTestCareer() {
     icao: "TST",
     hub: hubs[0],
     strategy: strategies[1],
-    aircraft: aircraft[1],
-    route: routeSeeds.JNB[0],
   });
 }
 
-test("creates a versioned career and advances it without mutating the original", async () => {
+test("registration creates a versioned career without aircraft or routes", async () => {
   const career = await createTestCareer();
 
   const { CURRENT_SAVE_VERSION } =
     await vite.ssrLoadModule("/types/game.ts");
-
-  const { advanceCareerWeek } =
-    await vite.ssrLoadModule(
-      "/lib/game/simulation.ts",
-    );
 
   assert.equal(
     career.saveVersion,
@@ -61,17 +54,59 @@ test("creates a versioned career and advances it without mutating the original",
   );
   assert.equal(career.week, 1);
   assert.equal(career.ceoName, "Alex Morgan");
+  assert.equal(career.aircraft, null);
+  assert.equal(career.route, null);
+  assert.equal(career.cash, career.strategy.capital);
+  assert.equal(career.passengers, 0);
+  assert.equal(career.lastProfit, 0);
   assert.ok(career.careerId);
   assert.ok(career.createdAt);
+});
+
+test("weekly simulation stays parked until operations exist", async () => {
+  const career = await createTestCareer();
+
+  const { advanceCareerWeek } =
+    await vite.ssrLoadModule(
+      "/lib/game/simulation.ts",
+    );
 
   const result = advanceCareerWeek(career);
 
-  assert.equal(career.week, 1);
+  assert.equal(result.game, career);
+  assert.equal(result.week, 1);
+  assert.equal(result.passengers, 0);
+  assert.equal(result.profit, 0);
+});
+
+test("an existing operational career still advances without mutation", async () => {
+  const career = await createTestCareer();
+  const { aircraft, routeSeeds } =
+    await vite.ssrLoadModule("/lib/game-data.ts");
+  const { advanceCareerWeek } =
+    await vite.ssrLoadModule(
+      "/lib/game/simulation.ts",
+    );
+
+  const operationalCareer = {
+    ...career,
+    aircraft: aircraft[1],
+    route: routeSeeds.JNB[0],
+    loadFactor: 64,
+    onTime: 91.4,
+    aircraftCondition: 100,
+  };
+
+  const result = advanceCareerWeek(
+    operationalCareer,
+  );
+
+  assert.equal(operationalCareer.week, 1);
   assert.equal(result.week, 2);
   assert.equal(result.game.week, 2);
   assert.equal(
     result.game.cash,
-    career.cash + result.profit,
+    operationalCareer.cash + result.profit,
   );
   assert.equal(
     result.game.passengers,
@@ -121,5 +156,7 @@ test("migrates a pre-CEO career with safe profile fallbacks", async () => {
     migrated.ceoBackground,
     "Airline founder",
   );
+  assert.equal(migrated.aircraft, null);
+  assert.equal(migrated.route, null);
   assert.ok(migrated.careerId);
 });

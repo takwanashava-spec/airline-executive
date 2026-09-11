@@ -7,6 +7,71 @@ import { formatMoney } from "@/lib/game-data";
 import type { AirlineState } from "@/types/game";
 
 export function FleetView({ game }: { game: AirlineState }) {
+  if (!game.aircraft) {
+    return (
+      <section className="module-grid">
+        <article className="panel aircraft-detail">
+          <div className="aircraft-banner">
+            <div className="plane-large">
+              <Plane />
+            </div>
+
+            <div>
+              <span className="panel-eyebrow">FLEET DEVELOPMENT</span>
+              <h2>No aircraft acquired</h2>
+              <p>
+                {game.airlineName} begins as a registered company. Aircraft
+                acquisition will happen here inside the game.
+              </p>
+            </div>
+          </div>
+
+          <div className="spec-grid">
+            <div>
+              <span>OWNED</span>
+              <strong>0 aircraft</strong>
+            </div>
+            <div>
+              <span>LEASED</span>
+              <strong>0 aircraft</strong>
+            </div>
+            <div>
+              <span>MONTHLY COMMITMENT</span>
+              <strong>{formatMoney(0)}</strong>
+            </div>
+          </div>
+        </article>
+
+        <article className="panel">
+          <div className="panel-heading compact">
+            <div>
+              <span className="panel-eyebrow">ACQUISITION</span>
+              <h2>First fleet decision</h2>
+            </div>
+            <span className="status-on-time">COMING NEXT</span>
+          </div>
+
+          <div className="maintenance-list">
+            <div>
+              <span>
+                <Plane />
+                Review aircraft market
+              </span>
+              <strong>Not yet available</strong>
+            </div>
+            <div>
+              <span>
+                <ShieldCheck />
+                Compare lease and purchase
+              </span>
+              <strong>Not yet available</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+    );
+  }
+
   return (
     <section className="module-grid">
       <article className="panel aircraft-detail">
