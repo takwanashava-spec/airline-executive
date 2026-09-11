@@ -7,9 +7,17 @@ import { formatMoney } from "@/lib/game-data";
 import type { AirlineState } from "@/types/game";
 
 export function FinanceView({ game }: { game: AirlineState }) {
-  const leaseCost = game.aircraft
-    ? game.aircraft.monthlyLease / 4.33
-    : 0;
+  const ownedPrimaryAircraft =
+    game.fleet.find(
+      (item) =>
+        item.aircraft.model ===
+          game.aircraft?.model &&
+        item.purchasePrice > 0,
+    );
+  const leaseCost =
+    game.aircraft && !ownedPrimaryAircraft
+      ? game.aircraft.monthlyLease / 4.33
+      : 0;
   const margin = game.lastRevenue
     ? (game.lastProfit / game.lastRevenue) * 100
     : 0;
