@@ -5,7 +5,7 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 7;
+export const CURRENT_SAVE_VERSION = 8;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
 
@@ -56,6 +56,17 @@ export type AuctionBid = {
   counterAmount?: number;
 };
 
+export type LeaseApplication = {
+  id: string;
+  offerId: string;
+  submittedAt: string;
+  decisionAt: string;
+  status: "pending" | "approved" | "countered" | "rejected" | "withdrawn" | "completed";
+  proposedMonthlyRate: number;
+  approvedMonthlyRate?: number;
+  depositMonths?: number;
+};
+
 export type FleetAircraft = {
   id: string;
   registration: string;
@@ -98,6 +109,7 @@ export type AirlineState = {
   fleet: FleetAircraft[];
   inbox: InboxMessage[];
   auctionBids: AuctionBid[];
+  leaseApplications: LeaseApplication[];
   route: RouteSeed | null;
   gameDateTime: string;
   week: number;

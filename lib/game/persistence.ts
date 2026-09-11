@@ -277,6 +277,9 @@ export function migrateCareer(
     auctionBids: Array.isArray(value.auctionBids)
       ? (value.auctionBids as AirlineState["auctionBids"])
       : [],
+    leaseApplications: Array.isArray(value.leaseApplications)
+      ? (value.leaseApplications as AirlineState["leaseApplications"])
+      : [],
     ceoName:
       typeof value.ceoName === "string" &&
       value.ceoName.trim()

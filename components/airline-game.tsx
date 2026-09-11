@@ -20,6 +20,7 @@ import {
 } from "@/lib/game/simulation";
 import type { AirlineState, GameSpeed } from "@/types/game";
 import { markMessageRead, respondToAuctionMessage, submitAuctionBid } from "@/lib/game/auctions";
+import { respondToLeaseMessage, submitLeaseApplication } from "@/lib/game/leasing";
 
 type Screen = "opening" | "setup" | "game" | "exited";
 
@@ -137,10 +138,21 @@ export default function AirlineGame() {
 
   const handleMessageResponse = (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => {
     if (!game) return;
-    const result = respondToAuctionMessage(game, messageId, action, amount);
+    const message = game.inbox.find((item) => item.id === messageId);
+    const result = message?.category === "finance"
+      ? respondToLeaseMessage(game, messageId, action, amount)
+      : respondToAuctionMessage(game, messageId, action, amount);
     if (result.error) return void toast.error(result.error);
     setGame(result.game);
     toast.success(action === "accept" ? "Transaction completed" : action === "revise" ? "Revised bid submitted" : "Correspondence closed");
+  };
+
+  const handleLeaseApplication = (offerId: string) => {
+    if (!game) return;
+    const result = submitLeaseApplication(game, offerId);
+    if (result.error) return void toast.error(result.error);
+    setGame(result.game);
+    toast.success("Lease application submitted", { description: "The lessor will respond through your executive inbox within one game day." });
   };
 
   if (!loaded) {
@@ -206,6 +218,7 @@ export default function AirlineGame() {
         handleAcquireAircraft
       }
       onAuctionBid={handleAuctionBid}
+      onLeaseApply={handleLeaseApplication}
       onReadMessage={(messageId) => setGame((current) => current ? markMessageRead(current, messageId) : current)}
       onRespondToMessage={handleMessageResponse}
     />

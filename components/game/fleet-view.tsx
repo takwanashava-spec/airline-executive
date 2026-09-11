@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { ManufacturerLogo } from "@/components/game/manufacturer-logo";
+import { LessorMarket } from "@/components/game/lessor-market";
 import { Button } from "@/components/ui/button";
 import {
   aircraftManufacturers,
@@ -55,6 +56,7 @@ export function FleetView({
   game,
   onAcquireAircraft,
   onAuctionBid,
+  onLeaseApply,
 }: {
   game: AirlineState;
   onAcquireAircraft: (
@@ -62,6 +64,7 @@ export function FleetView({
     method: AircraftAcquisitionMethod,
   ) => void;
   onAuctionBid: (listingId: string, amount: number) => void;
+  onLeaseApply: (offerId: string) => void;
 }) {
   const [market, setMarket] =
     useState<AircraftMarket>("new");
@@ -400,7 +403,9 @@ export function FleetView({
           </div>
         )}
 
-        {market === "used" && usedSection === "auction" ? (
+        {market === "lessor" ? (
+          <LessorMarket game={game} onApply={onLeaseApply} />
+        ) : market === "used" && usedSection === "auction" ? (
           selectedManufacturer === null ? (
             <div className="manufacturer-directory">
               {[...new Set(auctionListings.map((listing) => listing.manufacturer))].map((manufacturer) => {

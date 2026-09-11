@@ -62,12 +62,27 @@ test("registration creates a versioned career with a game clock", async () => {
   assert.deepEqual(career.fleet, []);
   assert.deepEqual(career.inbox, []);
   assert.deepEqual(career.auctionBids, []);
+  assert.deepEqual(career.leaseApplications, []);
   assert.equal(career.route, null);
   assert.equal(career.cash, career.strategy.capital);
   assert.equal(career.passengers, 0);
   assert.equal(career.lastProfit, 0);
   assert.ok(career.careerId);
   assert.ok(career.createdAt);
+});
+
+test("lease applications receive an inbox decision after one game day", async () => {
+  const career = await createTestCareer();
+  const { leaseOffers, processLeaseDecisions, submitLeaseApplication } = await vite.ssrLoadModule("/lib/game/leasing.ts");
+  const submitted = submitLeaseApplication(career, leaseOffers[0].id);
+
+  assert.equal(submitted.error, null);
+  assert.equal(submitted.game.leaseApplications[0].status, "pending");
+  assert.match(submitted.game.inbox[0].subject, /Lease application received/);
+
+  const resolved = processLeaseDecisions(submitted.game, submitted.game.leaseApplications[0].decisionAt);
+  assert.notEqual(resolved.leaseApplications[0].status, "pending");
+  assert.equal(resolved.inbox[0].status, "unread");
 });
 
 test("auction bids resolve through the executive inbox after one game day", async () => {

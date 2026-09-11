@@ -1,5 +1,6 @@
 import type { AirlineState } from "@/types/game";
 import { processAuctionDecisions } from "@/lib/game/auctions";
+import { processLeaseDecisions } from "@/lib/game/leasing";
 
 export const GAME_MINUTES_PER_REAL_SECOND =
   1 / 60;
@@ -59,13 +60,18 @@ export function advanceCareerClock(
     nextGame = advanceCareerWeek(nextGame).game;
   }
 
-  return processAuctionDecisions({
+  const auctionGame = processAuctionDecisions({
     ...nextGame,
     gameDateTime: new Date(
       nextGameTime,
     ).toISOString(),
     updatedAt: new Date().toISOString(),
   }, new Date(nextGameTime).toISOString());
+
+  return processLeaseDecisions(
+    auctionGame,
+    new Date(nextGameTime).toISOString(),
+  );
 }
 
 export function advanceCareerWeek(
