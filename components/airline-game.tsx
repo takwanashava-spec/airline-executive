@@ -9,6 +9,9 @@ import { ExitScreen } from "@/components/game/exit-screen";
 import { GameShell } from "@/components/game/game-shell";
 import { OpeningMenu } from "@/components/game/opening-menu";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  purchaseAircraft,
+} from "@/lib/game/fleet";
 import { loadCareer, saveCareer } from "@/lib/game/persistence";
 import {
   advanceCareerClock,
@@ -83,6 +86,34 @@ export default function AirlineGame() {
     };
   }, [clockSpeed, screen]);
 
+  const handlePurchaseAircraft = (
+    model: string,
+  ) => {
+    if (!game) return;
+
+    const result = purchaseAircraft(
+      game,
+      model,
+    );
+
+    if (result.error || !result.aircraft) {
+      toast.error(
+        result.error ??
+          "The aircraft could not be purchased.",
+      );
+      return;
+    }
+
+    setGame(result.game);
+
+    toast.success(
+      `${result.aircraft.aircraft.model} purchased`,
+      {
+        description: `${result.aircraft.registration} has joined the fleet at ${game.hub.code}.`,
+      },
+    );
+  };
+
   if (!loaded) {
     return (
       <div className="loading-screen">
@@ -142,6 +173,9 @@ export default function AirlineGame() {
       game={game}
       clockSpeed={clockSpeed}
       onClockSpeedChange={setClockSpeed}
+      onPurchaseAircraft={
+        handlePurchaseAircraft
+      }
     />
   );
 }
