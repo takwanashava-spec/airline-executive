@@ -21,6 +21,7 @@ import { CommandCentre } from "@/components/game/command-centre";
 import { FinanceView } from "@/components/game/finance-view";
 import { FleetView } from "@/components/game/fleet-view";
 import { NetworkView } from "@/components/game/network-view";
+import type { AircraftAcquisitionMethod } from "@/lib/game/fleet";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import type {
@@ -40,15 +41,16 @@ export function GameShell({
   game,
   clockSpeed,
   onClockSpeedChange,
-  onPurchaseAircraft,
+  onAcquireAircraft,
 }: {
   game: AirlineState;
   clockSpeed: GameSpeed;
   onClockSpeedChange: (
     speed: GameSpeed,
   ) => void;
-  onPurchaseAircraft: (
-    model: string,
+  onAcquireAircraft: (
+    offerId: string,
+    method: AircraftAcquisitionMethod,
   ) => void;
 }) {
   const [view, setView] = useState<View>("overview");
@@ -255,8 +257,8 @@ export function GameShell({
           {view === "fleet" && (
             <FleetView
               game={game}
-              onPurchaseAircraft={
-                onPurchaseAircraft
+              onAcquireAircraft={
+                onAcquireAircraft
               }
             />
           )}
