@@ -7,17 +7,21 @@ import { formatMoney } from "@/lib/game-data";
 import type { AirlineState } from "@/types/game";
 
 export function FinanceView({ game }: { game: AirlineState }) {
-  const ownedPrimaryAircraft =
-    game.fleet.find(
-      (item) =>
-        item.aircraft.model ===
-          game.aircraft?.model &&
-        item.purchasePrice > 0,
+  const monthlyAircraftCommitments =
+    game.fleet.reduce(
+      (total, item) =>
+        total + item.monthlyPayment,
+      0,
     );
-  const leaseCost =
-    game.aircraft && !ownedPrimaryAircraft
-      ? game.aircraft.monthlyLease / 4.33
+  const legacyMonthlyLease =
+    game.fleet.length === 0 &&
+    game.aircraft
+      ? game.aircraft.monthlyLease
       : 0;
+  const weeklyAircraftCommitments =
+    (monthlyAircraftCommitments +
+      legacyMonthlyLease) /
+    4.33;
   const margin = game.lastRevenue
     ? (game.lastProfit / game.lastRevenue) * 100
     : 0;
@@ -26,8 +30,8 @@ export function FinanceView({ game }: { game: AirlineState }) {
     { label: "Passenger revenue", value: game.lastRevenue, type: "income" },
     { label: "Fuel & emissions", value: -(game.lastCosts * 0.34), type: "cost" },
     {
-      label: "Aircraft lease",
-      value: -leaseCost,
+      label: "Aircraft commitments",
+      value: -weeklyAircraftCommitments,
       type: "cost",
     },
     { label: "Crew & operations", value: -(game.lastCosts * 0.27), type: "cost" },
