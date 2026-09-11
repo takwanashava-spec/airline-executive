@@ -108,6 +108,94 @@ test("purchasing an aircraft deducts cash and adds it to the fleet", async () =>
   assert.equal(career.fleet.length, 0);
 });
 
+test("financing a new aircraft records the deposit and monthly commitment", async () => {
+  const career = await createTestCareer();
+  const {
+    acquireAircraft,
+    aircraftMarketOffers,
+  } = await vite.ssrLoadModule(
+    "/lib/game/fleet.ts",
+  );
+  const offer = aircraftMarketOffers.find(
+    (item) =>
+      item.market === "new" &&
+      item.aircraft.model ===
+        "Embraer E195-E2",
+  );
+
+  assert.ok(offer);
+
+  const result = acquireAircraft(
+    career,
+    offer.id,
+    "finance",
+  );
+
+  assert.equal(result.error, null);
+  assert.ok(result.aircraft);
+  assert.equal(
+    result.game.cash,
+    career.cash - offer.financeDeposit,
+  );
+  assert.equal(
+    result.aircraft.acquisitionType,
+    "financed",
+  );
+  assert.equal(
+    result.aircraft.monthlyPayment,
+    offer.financeMonthlyPayment,
+  );
+  assert.equal(
+    result.aircraft.outstandingBalance,
+    offer.cashPrice - offer.financeDeposit,
+  );
+  assert.equal(result.aircraft.market, "new");
+});
+
+test("leasing from a lessor records the deposit and contract", async () => {
+  const career = await createTestCareer();
+  const {
+    acquireAircraft,
+    aircraftMarketOffers,
+  } = await vite.ssrLoadModule(
+    "/lib/game/fleet.ts",
+  );
+  const offer = aircraftMarketOffers.find(
+    (item) =>
+      item.market === "lessor" &&
+      item.aircraft.model ===
+        "ATR 72-600",
+  );
+
+  assert.ok(offer);
+
+  const result = acquireAircraft(
+    career,
+    offer.id,
+    "lease",
+  );
+
+  assert.equal(result.error, null);
+  assert.ok(result.aircraft);
+  assert.equal(
+    result.game.cash,
+    career.cash - offer.monthlyLease * 3,
+  );
+  assert.equal(
+    result.aircraft.acquisitionType,
+    "leased",
+  );
+  assert.equal(
+    result.aircraft.monthlyPayment,
+    offer.monthlyLease,
+  );
+  assert.equal(
+    result.aircraft.provider,
+    offer.provider,
+  );
+  assert.equal(result.aircraft.market, "lessor");
+});
+
 test("an unaffordable aircraft purchase leaves the career unchanged", async () => {
   const career = await createTestCareer();
   const { purchaseAircraft } =
