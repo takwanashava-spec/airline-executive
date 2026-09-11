@@ -62,6 +62,9 @@ export function createInitialCareer({
     strategy,
     aircraft: null,
     route: null,
+    gameDateTime: new Date(
+      Date.UTC(2026, 8, 6, 8, 0, 0),
+    ).toISOString(),
     week: 1,
     cash: strategy.capital,
     reputation: 50,
