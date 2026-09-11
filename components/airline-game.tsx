@@ -9,9 +9,7 @@ import { ExitScreen } from "@/components/game/exit-screen";
 import { GameShell } from "@/components/game/game-shell";
 import { OpeningMenu } from "@/components/game/opening-menu";
 import { Toaster } from "@/components/ui/sonner";
-import { formatMoney } from "@/lib/game-data";
 import { loadCareer, saveCareer } from "@/lib/game/persistence";
-import { advanceCareerWeek } from "@/lib/game/simulation";
 import type { AirlineState } from "@/types/game";
 
 type Screen = "opening" | "setup" | "game" | "exited";
@@ -35,26 +33,6 @@ export default function AirlineGame() {
       saveCareer(window.localStorage, game);
     }
   }, [game, loaded]);
-
-  const advanceWeek = () => {
-    if (!game) return;
-
-    const result = advanceCareerWeek(game);
-    setGame(result.game);
-
-    toast(
-      result.profit >= 0
-        ? `Week ${result.week} closed with ${formatMoney(
-            result.profit,
-          )} operating profit`
-        : `Week ${result.week} closed with a ${formatMoney(
-            result.profit,
-          )} loss`,
-      {
-        description: `${result.passengers.toLocaleString()} passengers · ${result.loadFactor}% load factor`,
-      },
-    );
-  };
 
   if (!loaded) {
     return (
@@ -91,7 +69,7 @@ export default function AirlineGame() {
           onLaunch={(state) => {
             setGame(state);
             setScreen("game");
-            toast.success(`${state.airlineName} is cleared for launch`);
+            toast.success(`${state.airlineName} is registered`);
           }}
         />
         <Toaster position="bottom-right" />
@@ -110,5 +88,5 @@ export default function AirlineGame() {
     );
   }
 
-  return <GameShell game={game} onAdvanceWeek={advanceWeek} />;
+  return <GameShell game={game} />;
 }
