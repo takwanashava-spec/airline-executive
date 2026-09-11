@@ -187,7 +187,7 @@ export function GameShell({
                 Ⅱ
               </button>
 
-              {([1, 2, 4] as const).map(
+              {([1, 60, 360] as const).map(
                 (speed) => (
                   <button
                     type="button"
