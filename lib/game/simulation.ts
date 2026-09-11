@@ -1,6 +1,7 @@
 import type { AirlineState } from "@/types/game";
 
-export const GAME_MINUTES_PER_REAL_SECOND = 5;
+export const GAME_MINUTES_PER_REAL_SECOND =
+  1 / 60;
 
 const INITIAL_GAME_TIME = Date.UTC(
   2026,
