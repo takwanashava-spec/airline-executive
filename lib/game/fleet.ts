@@ -1,7 +1,9 @@
 import {
   aircraft,
+  aircraftManufacturers,
   aircraftPurchasePrices,
   type Aircraft,
+  type AircraftManufacturerId,
 } from "@/lib/game-data";
 import type {
   AircraftAcquisitionType,
@@ -33,7 +35,7 @@ export type AircraftAcquisitionMethod =
 export type AircraftMarketOffer = {
   id: string;
   market: AircraftMarket;
-  manufacturer: string;
+  manufacturer: AircraftManufacturerId;
   aircraft: Aircraft;
   provider: string;
   manufactureYear: number;
@@ -53,8 +55,14 @@ export type AircraftAcquisitionResult = {
   error: string | null;
 };
 
-function manufacturerOf(model: string) {
-  return model.split(" ")[0];
+function manufacturerOf(item: Aircraft) {
+  return (
+    aircraftManufacturers.find(
+      (manufacturer) =>
+        manufacturer.id ===
+        item.manufacturerId,
+    ) ?? aircraftManufacturers[0]
+  );
 }
 
 function aircraftByModel(model: string) {
@@ -163,17 +171,15 @@ const newOffers: AircraftMarketOffer[] =
       cashPrice,
       "new",
     );
+    const manufacturer =
+      manufacturerOf(item);
 
     return {
       id: `new-${item.model}`,
       market: "new",
-      manufacturer: manufacturerOf(
-        item.model,
-      ),
+      manufacturer: manufacturer.id,
       aircraft: item,
-      provider: `${manufacturerOf(
-        item.model,
-      )} Commercial Aircraft`,
+      provider: manufacturer.fullName,
       manufactureYear: 2026,
       flightHours: 0,
       condition: 100,
@@ -205,9 +211,7 @@ const usedOffers: AircraftMarketOffer[] =
       {
         id: `used-${item.model}`,
         market: "used" as const,
-        manufacturer: manufacturerOf(
-          item.model,
-        ),
+        manufacturer: item.manufacturerId,
         aircraft: item,
         provider: detail.provider,
         manufactureYear:
@@ -239,9 +243,7 @@ const lessorOffers: AircraftMarketOffer[] =
       {
         id: `lessor-${item.model}`,
         market: "lessor" as const,
-        manufacturer: manufacturerOf(
-          item.model,
-        ),
+        manufacturer: item.manufacturerId,
         aircraft: item,
         provider: detail.provider,
         manufactureYear:
@@ -305,6 +307,19 @@ export function acquireAircraft(
       game: currentGame,
       aircraft: null,
       error: "Aircraft offer is no longer available.",
+    };
+  }
+
+  if (
+    offer.market === "new" &&
+    offer.aircraft.availability ===
+      "development"
+  ) {
+    return {
+      game: currentGame,
+      aircraft: null,
+      error:
+        "This aircraft programme is not yet available for immediate delivery.",
     };
   }
 
