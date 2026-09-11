@@ -460,26 +460,26 @@ button:focus-visible,input:focus-visible { outline:3px solid rgba(242,184,75,.45
   background: #fff;
 }
 
-.manufacturer-market > header div {
+.manufacturer-market-identity {
   display: flex;
   align-items: baseline;
   gap: .65rem;
 }
 
-.manufacturer-market > header span {
+.manufacturer-market-identity > span {
   color: #9a6c22;
   font-size: .56rem;
   font-weight: 850;
   letter-spacing: .1em;
 }
 
-.manufacturer-market > header h3 {
+.manufacturer-market-identity h3 {
   margin: 0;
   color: #17283e;
   font-size: 1.02rem;
 }
 
-.manufacturer-market > header small {
+.manufacturer-market-identity small {
   color: #8793a0;
   font-size: .64rem;
 }
@@ -528,7 +528,7 @@ button:focus-visible,input:focus-visible { outline:3px solid rgba(242,184,75,.45
     grid-template-columns: 1fr;
   }
 
-  .manufacturer-market > header div {
+  .manufacturer-market-identity {
     align-items: flex-start;
     flex-direction: column;
     gap: .2rem;
@@ -536,5 +536,157 @@ button:focus-visible,input:focus-visible { outline:3px solid rgba(242,184,75,.45
 
   .aircraft-acquisition-actions {
     grid-template-columns: 1fr;
+  }
+}
+
+
+/* Manufacturer showrooms */
+.manufacturer-logo {
+  width: 156px;
+  min-width: 156px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  padding: .55rem .75rem;
+  border: 1px solid #dde4e9;
+  border-radius: 7px;
+  background: #fff;
+  font-weight: 900;
+  letter-spacing: .03em;
+}
+
+.manufacturer-logo svg {
+  width: 35px;
+  height: 30px;
+}
+
+.manufacturer-logo-atr {
+  border-color: #e1d8d8;
+}
+
+.manufacturer-logo-atr .atr-wordmark {
+  width: 86px;
+  display: grid;
+  place-items: center;
+  padding: .34rem .55rem;
+  border-radius: 3px;
+  background: #cf202f;
+  color: #fff;
+  font-size: 1.24rem;
+  letter-spacing: .14em;
+}
+
+.manufacturer-logo-embraer {
+  color: #123d78;
+  font-size: .86rem;
+}
+
+.manufacturer-logo-embraer svg {
+  fill: #123d78;
+}
+
+.manufacturer-logo-airbus {
+  color: #064a8e;
+  font-size: 1.05rem;
+}
+
+.manufacturer-logo-airbus svg {
+  fill: #064a8e;
+}
+
+.manufacturer-logo-boeing {
+  color: #174f91;
+  font-size: 1.02rem;
+}
+
+.manufacturer-logo-boeing svg {
+  overflow: visible;
+  fill: none;
+  stroke: #174f91;
+  stroke-width: 2;
+}
+
+.manufacturer-market-identity {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: .14rem;
+}
+
+.manufacturer-market-identity > span {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manufacturer-offer-count {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.aircraft-offer-meta {
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .55rem;
+}
+
+.aircraft-offer-meta > span {
+  overflow: hidden;
+  color: #8793a0;
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aircraft-offer-meta em {
+  padding: .22rem .38rem;
+  border-radius: 999px;
+  background: #e8f4ef;
+  color: #23745e;
+  font-size: .55rem;
+  font-style: normal;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.aircraft-offer-meta em.development {
+  background: #fff1d7;
+  color: #9a6717;
+}
+
+.aircraft-market-card .aircraft-engine-spec {
+  grid-column: 1 / -1;
+}
+
+.aircraft-engine-spec dd {
+  line-height: 1.35;
+}
+
+@media (max-width: 680px) {
+  .manufacturer-market > header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .manufacturer-logo {
+    width: 132px;
+    min-width: 132px;
+  }
+
+  .manufacturer-market-identity {
+    flex: 1;
+  }
+
+  .manufacturer-offer-count {
+    width: 100%;
+    margin-left: 0;
   }
 }
