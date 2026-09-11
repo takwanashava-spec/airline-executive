@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PlaneTakeoff } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,7 +10,11 @@ import { GameShell } from "@/components/game/game-shell";
 import { OpeningMenu } from "@/components/game/opening-menu";
 import { Toaster } from "@/components/ui/sonner";
 import { loadCareer, saveCareer } from "@/lib/game/persistence";
-import type { AirlineState } from "@/types/game";
+import {
+  advanceCareerClock,
+  GAME_MINUTES_PER_REAL_SECOND,
+} from "@/lib/game/simulation";
+import type { AirlineState, GameSpeed } from "@/types/game";
 
 type Screen = "opening" | "setup" | "game" | "exited";
 
@@ -18,6 +22,11 @@ export default function AirlineGame() {
   const [game, setGame] = useState<AirlineState | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [screen, setScreen] = useState<Screen>("opening");
+  const [clockSpeed, setClockSpeed] =
+    useState<GameSpeed>(1);
+  const lastClockTick = useRef<number | null>(
+    null,
+  );
 
   useEffect(() => {
     const savedGame = loadCareer(window.localStorage);
@@ -33,6 +42,46 @@ export default function AirlineGame() {
       saveCareer(window.localStorage, game);
     }
   }, [game, loaded]);
+
+  useEffect(() => {
+    if (
+      screen !== "game" ||
+      clockSpeed === 0
+    ) {
+      lastClockTick.current = null;
+      return;
+    }
+
+    lastClockTick.current = Date.now();
+
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      const previous =
+        lastClockTick.current ?? now;
+      const realSeconds = Math.max(
+        0,
+        (now - previous) / 1_000,
+      );
+
+      lastClockTick.current = now;
+
+      setGame((currentGame) =>
+        currentGame
+          ? advanceCareerClock(
+              currentGame,
+              realSeconds *
+                GAME_MINUTES_PER_REAL_SECOND *
+                clockSpeed,
+            )
+          : currentGame,
+      );
+    }, 1_000);
+
+    return () => {
+      window.clearInterval(timer);
+      lastClockTick.current = null;
+    };
+  }, [clockSpeed, screen]);
 
   if (!loaded) {
     return (
@@ -88,5 +137,11 @@ export default function AirlineGame() {
     );
   }
 
-  return <GameShell game={game} />;
+  return (
+    <GameShell
+      game={game}
+      clockSpeed={clockSpeed}
+      onClockSpeedChange={setClockSpeed}
+    />
+  );
 }
