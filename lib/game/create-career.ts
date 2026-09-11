@@ -65,6 +65,9 @@ export function createInitialCareer({
     inbox: [],
     auctionBids: [],
     leaseApplications: [],
+    usedAircraftTransactions: [],
+    inspectedUsedAircraft: [],
+    usedAircraftWatchlist: [],
     route: null,
     gameDateTime: new Date(
       Date.UTC(2026, 8, 6, 8, 0, 0),

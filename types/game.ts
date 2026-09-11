@@ -5,14 +5,15 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 8;
+export const CURRENT_SAVE_VERSION = 9;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
 
 export type FleetAircraftStatus =
   | "parked"
   | "active"
-  | "maintenance";
+  | "maintenance"
+  | "delivery";
 
 export type AircraftAcquisitionType =
   | "owned"
@@ -33,7 +34,7 @@ export type InboxAction = {
 export type InboxMessage = {
   id: string;
   threadId: string;
-  category: "aircraft" | "auction" | "finance" | "operations";
+  category: "aircraft" | "used-aircraft" | "auction" | "finance" | "operations";
   senderName: string;
   senderCompany: string;
   subject: string;
@@ -65,6 +66,19 @@ export type LeaseApplication = {
   proposedMonthlyRate: number;
   approvedMonthlyRate?: number;
   depositMonths?: number;
+};
+
+export type UsedAircraftTransaction = {
+  id: string;
+  listingId: string;
+  kind: "inspection" | "offer" | "finance" | "purchase";
+  status: "pending" | "reported" | "accepted" | "countered" | "rejected" | "delivery" | "completed" | "withdrawn";
+  submittedAt: string;
+  decisionAt: string;
+  amount: number;
+  counterAmount?: number;
+  inspectionType?: "records" | "physical";
+  deliveryAt?: string;
 };
 
 export type FleetAircraft = {
@@ -110,6 +124,9 @@ export type AirlineState = {
   inbox: InboxMessage[];
   auctionBids: AuctionBid[];
   leaseApplications: LeaseApplication[];
+  usedAircraftTransactions: UsedAircraftTransaction[];
+  inspectedUsedAircraft: string[];
+  usedAircraftWatchlist: string[];
   route: RouteSeed | null;
   gameDateTime: string;
   week: number;

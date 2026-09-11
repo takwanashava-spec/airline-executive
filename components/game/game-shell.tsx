@@ -47,6 +47,11 @@ export function GameShell({
   onAcquireAircraft,
   onAuctionBid,
   onLeaseApply,
+  onUsedInspect,
+  onUsedOffer,
+  onUsedFinance,
+  onUsedBuy,
+  onUsedWatchlist,
   onReadMessage,
   onRespondToMessage,
 }: {
@@ -61,6 +66,11 @@ export function GameShell({
   ) => void;
   onAuctionBid: (listingId: string, amount: number) => void;
   onLeaseApply: (offerId: string) => void;
+  onUsedInspect: (listingId: string, type: "records" | "physical") => void;
+  onUsedOffer: (listingId: string, amount: number) => void;
+  onUsedFinance: (listingId: string) => void;
+  onUsedBuy: (listingId: string) => void;
+  onUsedWatchlist: (listingId: string) => void;
   onReadMessage: (messageId: string) => void;
   onRespondToMessage: (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => void;
 }) {
@@ -274,6 +284,11 @@ export function GameShell({
               }
               onAuctionBid={onAuctionBid}
               onLeaseApply={onLeaseApply}
+              onUsedInspect={onUsedInspect}
+              onUsedOffer={onUsedOffer}
+              onUsedFinance={onUsedFinance}
+              onUsedBuy={onUsedBuy}
+              onUsedWatchlist={onUsedWatchlist}
             />
           )}
           {view === "finance" && <FinanceView game={game} />}

@@ -280,6 +280,15 @@ export function migrateCareer(
     leaseApplications: Array.isArray(value.leaseApplications)
       ? (value.leaseApplications as AirlineState["leaseApplications"])
       : [],
+    usedAircraftTransactions: Array.isArray(value.usedAircraftTransactions)
+      ? (value.usedAircraftTransactions as AirlineState["usedAircraftTransactions"])
+      : [],
+    inspectedUsedAircraft: Array.isArray(value.inspectedUsedAircraft)
+      ? (value.inspectedUsedAircraft as string[])
+      : [],
+    usedAircraftWatchlist: Array.isArray(value.usedAircraftWatchlist)
+      ? (value.usedAircraftWatchlist as string[])
+      : [],
     ceoName:
       typeof value.ceoName === "string" &&
       value.ceoName.trim()

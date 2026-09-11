@@ -14,6 +14,7 @@ import {
 
 import { ManufacturerLogo } from "@/components/game/manufacturer-logo";
 import { LessorMarket } from "@/components/game/lessor-market";
+import { UsedAircraftMarket } from "@/components/game/used-aircraft-market";
 import { Button } from "@/components/ui/button";
 import {
   aircraftManufacturers,
@@ -57,6 +58,11 @@ export function FleetView({
   onAcquireAircraft,
   onAuctionBid,
   onLeaseApply,
+  onUsedInspect,
+  onUsedOffer,
+  onUsedFinance,
+  onUsedBuy,
+  onUsedWatchlist,
 }: {
   game: AirlineState;
   onAcquireAircraft: (
@@ -65,6 +71,11 @@ export function FleetView({
   ) => void;
   onAuctionBid: (listingId: string, amount: number) => void;
   onLeaseApply: (offerId: string) => void;
+  onUsedInspect: (listingId: string, type: "records" | "physical") => void;
+  onUsedOffer: (listingId: string, amount: number) => void;
+  onUsedFinance: (listingId: string) => void;
+  onUsedBuy: (listingId: string) => void;
+  onUsedWatchlist: (listingId: string) => void;
 }) {
   const [market, setMarket] =
     useState<AircraftMarket>("new");
@@ -449,6 +460,15 @@ export function FleetView({
             })}
           </div>
           </>
+        ) : market === "used" ? (
+          <UsedAircraftMarket
+            game={game}
+            onInspect={onUsedInspect}
+            onOffer={onUsedOffer}
+            onFinance={onUsedFinance}
+            onBuy={onUsedBuy}
+            onWatchlist={onUsedWatchlist}
+          />
         ) : (
 
         selectedManufacturer === null ? (

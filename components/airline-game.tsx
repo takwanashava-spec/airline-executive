@@ -21,6 +21,7 @@ import {
 import type { AirlineState, GameSpeed } from "@/types/game";
 import { markMessageRead, respondToAuctionMessage, submitAuctionBid } from "@/lib/game/auctions";
 import { respondToLeaseMessage, submitLeaseApplication } from "@/lib/game/leasing";
+import { applyForUsedAircraftFinance, buyUsedAircraftNow, requestUsedAircraftInspection, respondToUsedAircraftMessage, submitUsedAircraftOffer, toggleUsedAircraftWatchlist } from "@/lib/game/used-aircraft";
 
 type Screen = "opening" | "setup" | "game" | "exited";
 
@@ -139,7 +140,9 @@ export default function AirlineGame() {
   const handleMessageResponse = (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => {
     if (!game) return;
     const message = game.inbox.find((item) => item.id === messageId);
-    const result = message?.category === "finance"
+    const result = message?.category === "used-aircraft"
+      ? respondToUsedAircraftMessage(game, messageId, action, amount)
+      : message?.category === "finance"
       ? respondToLeaseMessage(game, messageId, action, amount)
       : respondToAuctionMessage(game, messageId, action, amount);
     if (result.error) return void toast.error(result.error);
@@ -153,6 +156,12 @@ export default function AirlineGame() {
     if (result.error) return void toast.error(result.error);
     setGame(result.game);
     toast.success("Lease application submitted", { description: "The lessor will respond through your executive inbox within one game day." });
+  };
+
+  const applyUsedResult = (result: { game: AirlineState; error: string | null }, success: string) => {
+    if (result.error) return void toast.error(result.error);
+    setGame(result.game);
+    toast.success(success, { description: "Updates and decisions will be delivered to your executive inbox." });
   };
 
   if (!loaded) {
@@ -219,6 +228,11 @@ export default function AirlineGame() {
       }
       onAuctionBid={handleAuctionBid}
       onLeaseApply={handleLeaseApplication}
+      onUsedInspect={(listingId, type) => applyUsedResult(requestUsedAircraftInspection(game, listingId, type), "Inspection instructed")}
+      onUsedOffer={(listingId, amount) => applyUsedResult(submitUsedAircraftOffer(game, listingId, amount), "Offer submitted")}
+      onUsedFinance={(listingId) => applyUsedResult(applyForUsedAircraftFinance(game, listingId), "Finance application submitted")}
+      onUsedBuy={(listingId) => applyUsedResult(buyUsedAircraftNow(game, listingId), "Purchase completed")}
+      onUsedWatchlist={(listingId) => setGame(toggleUsedAircraftWatchlist(game, listingId))}
       onReadMessage={(messageId) => setGame((current) => current ? markMessageRead(current, messageId) : current)}
       onRespondToMessage={handleMessageResponse}
     />

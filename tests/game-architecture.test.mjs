@@ -63,12 +63,38 @@ test("registration creates a versioned career with a game clock", async () => {
   assert.deepEqual(career.inbox, []);
   assert.deepEqual(career.auctionBids, []);
   assert.deepEqual(career.leaseApplications, []);
+  assert.deepEqual(career.usedAircraftTransactions, []);
+  assert.deepEqual(career.inspectedUsedAircraft, []);
+  assert.deepEqual(career.usedAircraftWatchlist, []);
   assert.equal(career.route, null);
   assert.equal(career.cash, career.strategy.capital);
   assert.equal(career.passengers, 0);
   assert.equal(career.lastProfit, 0);
   assert.ok(career.careerId);
   assert.ok(career.createdAt);
+});
+
+test("used aircraft inspections, offers and deliveries use the game clock", async () => {
+  const career = await createTestCareer();
+  const { buyUsedAircraftNow, processUsedAircraftTransactions, requestUsedAircraftInspection, submitUsedAircraftOffer, usedAircraftListings } = await vite.ssrLoadModule("/lib/game/used-aircraft.ts");
+  const listing = usedAircraftListings[0];
+  const inspected = requestUsedAircraftInspection(career, listing.id, "records");
+  assert.equal(inspected.error, null);
+  const report = processUsedAircraftTransactions(inspected.game, inspected.game.usedAircraftTransactions[0].decisionAt);
+  assert.ok(report.inspectedUsedAircraft.includes(listing.id));
+  assert.match(report.inbox[0].subject, /Inspection report/);
+
+  const offered = submitUsedAircraftOffer(career, listing.id, listing.askingPrice);
+  const decision = processUsedAircraftTransactions(offered.game, offered.game.usedAircraftTransactions[0].decisionAt);
+  assert.equal(decision.usedAircraftTransactions[0].status, "accepted");
+
+  const purchased = buyUsedAircraftNow(career, listing.id);
+  assert.equal(purchased.error, null);
+  assert.equal(purchased.game.fleet[0].status, "delivery");
+  const delivered = processUsedAircraftTransactions(purchased.game, purchased.game.usedAircraftTransactions[0].deliveryAt);
+  assert.equal(delivered.game ?? undefined, undefined);
+  assert.equal(delivered.fleet[0].status, "parked");
+  assert.equal(delivered.usedAircraftTransactions[0].status, "completed");
 });
 
 test("lease applications receive an inbox decision after one game day", async () => {
