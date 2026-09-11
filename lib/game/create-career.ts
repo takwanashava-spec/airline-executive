@@ -61,6 +61,7 @@ export function createInitialCareer({
     hub,
     strategy,
     aircraft: null,
+    fleet: [],
     route: null,
     gameDateTime: new Date(
       Date.UTC(2026, 8, 6, 8, 0, 0),
