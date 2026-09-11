@@ -59,12 +59,75 @@ test("registration creates a versioned career with a game clock", async () => {
   );
   assert.equal(career.ceoName, "Alex Morgan");
   assert.equal(career.aircraft, null);
+  assert.deepEqual(career.fleet, []);
   assert.equal(career.route, null);
   assert.equal(career.cash, career.strategy.capital);
   assert.equal(career.passengers, 0);
   assert.equal(career.lastProfit, 0);
   assert.ok(career.careerId);
   assert.ok(career.createdAt);
+});
+
+test("purchasing an aircraft deducts cash and adds it to the fleet", async () => {
+  const career = await createTestCareer();
+  const {
+    aircraftPurchasePrices,
+  } = await vite.ssrLoadModule(
+    "/lib/game-data.ts",
+  );
+  const { purchaseAircraft } =
+    await vite.ssrLoadModule(
+      "/lib/game/fleet.ts",
+    );
+
+  const result = purchaseAircraft(
+    career,
+    "ATR 72-600",
+  );
+
+  assert.equal(result.error, null);
+  assert.ok(result.aircraft);
+  assert.equal(
+    result.game.cash,
+    career.cash -
+      aircraftPurchasePrices["ATR 72-600"],
+  );
+  assert.equal(result.game.fleet.length, 1);
+  assert.equal(
+    result.game.fleet[0].registration,
+    "ZS-001",
+  );
+  assert.equal(
+    result.game.aircraft.model,
+    "ATR 72-600",
+  );
+  assert.equal(
+    result.game.fleet[0].status,
+    "parked",
+  );
+  assert.equal(career.fleet.length, 0);
+});
+
+test("an unaffordable aircraft purchase leaves the career unchanged", async () => {
+  const career = await createTestCareer();
+  const { purchaseAircraft } =
+    await vite.ssrLoadModule(
+      "/lib/game/fleet.ts",
+    );
+
+  const lowCashCareer = {
+    ...career,
+    cash: 1_000_000,
+  };
+  const result = purchaseAircraft(
+    lowCashCareer,
+    "Airbus A220-300",
+  );
+
+  assert.ok(result.error);
+  assert.equal(result.aircraft, null);
+  assert.equal(result.game, lowCashCareer);
+  assert.equal(result.game.fleet.length, 0);
 });
 
 test("game clock advances continuously and closes weeks automatically", async () => {
@@ -158,6 +221,7 @@ test("migrates an older career with safe clock and profile fallbacks", async () 
     updatedAt,
     saveVersion,
     gameDateTime,
+    fleet,
     ceoName,
     ceoNationality,
     ceoAge,
@@ -170,6 +234,7 @@ test("migrates an older career with safe clock and profile fallbacks", async () 
   assert.ok(updatedAt);
   assert.ok(saveVersion);
   assert.ok(gameDateTime);
+  assert.deepEqual(fleet, []);
   assert.ok(ceoName);
   assert.ok(ceoNationality);
   assert.ok(ceoAge);
@@ -198,6 +263,7 @@ test("migrates an older career with safe clock and profile fallbacks", async () 
     "2026-09-06T08:00:00.000Z",
   );
   assert.equal(migrated.aircraft, null);
+  assert.deepEqual(migrated.fleet, []);
   assert.equal(migrated.route, null);
   assert.ok(migrated.careerId);
 });
