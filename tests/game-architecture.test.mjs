@@ -66,12 +66,28 @@ test("registration creates a versioned career with a game clock", async () => {
   assert.deepEqual(career.usedAircraftTransactions, []);
   assert.deepEqual(career.inspectedUsedAircraft, []);
   assert.deepEqual(career.usedAircraftWatchlist, []);
+  assert.deepEqual(career.fleetTasks, []);
   assert.equal(career.route, null);
   assert.equal(career.cash, career.strategy.capital);
   assert.equal(career.passengers, 0);
   assert.equal(career.lastProfit, 0);
   assert.ok(career.careerId);
   assert.ok(career.createdAt);
+});
+
+test("fleet induction and maintenance progress on the game clock", async () => {
+  const career = await createTestCareer();
+  const { purchaseAircraft } = await vite.ssrLoadModule("/lib/game/fleet.ts");
+  const { performFleetAction, processFleetTasks } = await vite.ssrLoadModule("/lib/game/fleet-operations.ts");
+  const purchased = purchaseAircraft(career, "ATR 72-600").game;
+  const aircraftId = purchased.fleet[0].id;
+  const started = performFleetAction(purchased, aircraftId, "advance-induction");
+  assert.equal(started.error, null);
+  assert.equal(started.game.fleet[0].status, "induction");
+  const completed = processFleetTasks(started.game, started.game.fleetTasks[0].completesAt);
+  assert.equal(completed.fleet[0].inductionStage, "technical");
+  assert.equal(completed.fleetTasks[0].status, "completed");
+  assert.match(completed.inbox[0].subject, /completed/i);
 });
 
 test("used aircraft inspections, offers and deliveries use the game clock", async () => {

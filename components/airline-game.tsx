@@ -22,6 +22,7 @@ import type { AirlineState, GameSpeed } from "@/types/game";
 import { markMessageRead, respondToAuctionMessage, submitAuctionBid } from "@/lib/game/auctions";
 import { respondToLeaseMessage, submitLeaseApplication } from "@/lib/game/leasing";
 import { applyForUsedAircraftFinance, buyUsedAircraftNow, requestUsedAircraftInspection, respondToUsedAircraftMessage, submitUsedAircraftOffer, toggleUsedAircraftWatchlist } from "@/lib/game/used-aircraft";
+import { performFleetAction, type FleetAction } from "@/lib/game/fleet-operations";
 
 type Screen = "opening" | "setup" | "game" | "exited";
 
@@ -164,6 +165,14 @@ export default function AirlineGame() {
     toast.success(success, { description: "Updates and decisions will be delivered to your executive inbox." });
   };
 
+  const handleFleetAction = (aircraftId: string, action: FleetAction, option?: string) => {
+    if (!game) return;
+    const result = performFleetAction(game, aircraftId, action, option);
+    if (result.error) return void toast.error(result.error);
+    setGame(result.game);
+    toast.success(action.includes("maintenance") || action.includes("check") ? "Maintenance scheduled" : "Fleet work scheduled", { description: "Progress will update with the game clock." });
+  };
+
   if (!loaded) {
     return (
       <div className="loading-screen">
@@ -233,6 +242,7 @@ export default function AirlineGame() {
       onUsedFinance={(listingId) => applyUsedResult(applyForUsedAircraftFinance(game, listingId), "Finance application submitted")}
       onUsedBuy={(listingId) => applyUsedResult(buyUsedAircraftNow(game, listingId), "Purchase completed")}
       onUsedWatchlist={(listingId) => setGame(toggleUsedAircraftWatchlist(game, listingId))}
+      onFleetAction={handleFleetAction}
       onReadMessage={(messageId) => setGame((current) => current ? markMessageRead(current, messageId) : current)}
       onRespondToMessage={handleMessageResponse}
     />

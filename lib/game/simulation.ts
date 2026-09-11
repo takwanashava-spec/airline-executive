@@ -2,6 +2,7 @@ import type { AirlineState } from "@/types/game";
 import { processAuctionDecisions } from "@/lib/game/auctions";
 import { processLeaseDecisions } from "@/lib/game/leasing";
 import { processUsedAircraftTransactions } from "@/lib/game/used-aircraft";
+import { processFleetTasks } from "@/lib/game/fleet-operations";
 
 export const GAME_MINUTES_PER_REAL_SECOND =
   1 / 60;
@@ -74,8 +75,13 @@ export function advanceCareerClock(
     new Date(nextGameTime).toISOString(),
   );
 
-  return processUsedAircraftTransactions(
+  const usedAircraftGame = processUsedAircraftTransactions(
     leaseGame,
+    new Date(nextGameTime).toISOString(),
+  );
+
+  return processFleetTasks(
+    usedAircraftGame,
     new Date(nextGameTime).toISOString(),
   );
 }

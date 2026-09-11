@@ -5,7 +5,7 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 9;
+export const CURRENT_SAVE_VERSION = 10;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
 
@@ -13,7 +13,23 @@ export type FleetAircraftStatus =
   | "parked"
   | "active"
   | "maintenance"
-  | "delivery";
+  | "delivery"
+  | "induction";
+
+export type CabinPreset = "high-density" | "standard" | "two-class" | "three-class" | "premium";
+export type InductionStage = "not-started" | "technical" | "registration" | "cabin" | "base" | "complete";
+export type FleetTask = {
+  id: string;
+  aircraftId: string;
+  kind: "induction" | "maintenance";
+  label: string;
+  provider: string;
+  startedAt: string;
+  completesAt: string;
+  cost: number;
+  status: "active" | "completed";
+  targetStage?: InductionStage;
+};
 
 export type AircraftAcquisitionType =
   | "owned"
@@ -96,6 +112,17 @@ export type FleetAircraft = {
   outstandingBalance: number;
   manufactureYear: number;
   flightHours: number;
+  flightCycles?: number;
+  serialNumber?: string;
+  currentLocation?: string;
+  baseCode?: string;
+  inductionStage?: InductionStage;
+  cabinPreset?: CabinPreset;
+  cabinClasses?: { economy: number; premiumEconomy: number; business: number; first: number };
+  insured?: boolean;
+  locallyRegistered?: boolean;
+  nextMaintenanceAt?: string;
+  utilisationHours?: number;
 };
 
 export type View =
@@ -127,6 +154,7 @@ export type AirlineState = {
   usedAircraftTransactions: UsedAircraftTransaction[];
   inspectedUsedAircraft: string[];
   usedAircraftWatchlist: string[];
+  fleetTasks: FleetTask[];
   route: RouteSeed | null;
   gameDateTime: string;
   week: number;

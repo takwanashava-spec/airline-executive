@@ -24,6 +24,7 @@ import { FleetView } from "@/components/game/fleet-view";
 import { InboxView } from "@/components/game/inbox-view";
 import { NetworkView } from "@/components/game/network-view";
 import type { AircraftAcquisitionMethod } from "@/lib/game/fleet";
+import type { FleetAction } from "@/lib/game/fleet-operations";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import type {
@@ -52,6 +53,7 @@ export function GameShell({
   onUsedFinance,
   onUsedBuy,
   onUsedWatchlist,
+  onFleetAction,
   onReadMessage,
   onRespondToMessage,
 }: {
@@ -71,6 +73,7 @@ export function GameShell({
   onUsedFinance: (listingId: string) => void;
   onUsedBuy: (listingId: string) => void;
   onUsedWatchlist: (listingId: string) => void;
+  onFleetAction: (aircraftId: string, action: FleetAction, option?: string) => void;
   onReadMessage: (messageId: string) => void;
   onRespondToMessage: (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => void;
 }) {
@@ -289,6 +292,7 @@ export function GameShell({
               onUsedFinance={onUsedFinance}
               onUsedBuy={onUsedBuy}
               onUsedWatchlist={onUsedWatchlist}
+              onFleetAction={onFleetAction}
             />
           )}
           {view === "finance" && <FinanceView game={game} />}

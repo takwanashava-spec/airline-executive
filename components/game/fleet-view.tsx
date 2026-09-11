@@ -15,6 +15,7 @@ import {
 import { ManufacturerLogo } from "@/components/game/manufacturer-logo";
 import { LessorMarket } from "@/components/game/lessor-market";
 import { UsedAircraftMarket } from "@/components/game/used-aircraft-market";
+import { FleetManagement, type FleetSection } from "@/components/game/fleet-management";
 import { Button } from "@/components/ui/button";
 import {
   aircraftManufacturers,
@@ -27,6 +28,7 @@ import {
   type AircraftMarketOffer,
 } from "@/lib/game/fleet";
 import { auctionListings } from "@/lib/game/auctions";
+import type { FleetAction } from "@/lib/game/fleet-operations";
 import type {
   AircraftMarket,
   AirlineState,
@@ -63,6 +65,7 @@ export function FleetView({
   onUsedFinance,
   onUsedBuy,
   onUsedWatchlist,
+  onFleetAction,
 }: {
   game: AirlineState;
   onAcquireAircraft: (
@@ -76,7 +79,9 @@ export function FleetView({
   onUsedFinance: (listingId: string) => void;
   onUsedBuy: (listingId: string) => void;
   onUsedWatchlist: (listingId: string) => void;
+  onFleetAction: (aircraftId: string, action: FleetAction, option?: string) => void;
 }) {
+  const [fleetSection, setFleetSection] = useState<FleetSection>("overview");
   const [market, setMarket] =
     useState<AircraftMarket>("new");
   const [
@@ -156,6 +161,20 @@ export function FleetView({
 
   return (
     <section className="fleet-page">
+      <nav className="fleet-workspace-nav" aria-label="Fleet management sections">
+        {([
+          ["overview", "Fleet overview"],
+          ["register", "Aircraft register"],
+          ["induction", "Induction & delivery"],
+          ["maintenance", "Maintenance"],
+          ["acquisition", "Aircraft acquisition"],
+        ] as [FleetSection, string][]).map(([id, label]) => (
+          <button type="button" key={id} className={fleetSection === id ? "active" : ""} onClick={() => setFleetSection(id)}>{label}</button>
+        ))}
+      </nav>
+
+      {fleetSection === "acquisition" ? (
+        <>
       <div className="fleet-ownership-summary">
         <article>
           <span>TOTAL FLEET</span>
@@ -857,6 +876,10 @@ export function FleetView({
         )
         )}
       </article>
+        </>
+      ) : (
+        <FleetManagement game={game} section={fleetSection} onAction={onFleetAction} />
+      )}
     </section>
   );
 }
