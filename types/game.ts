@@ -5,7 +5,7 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 2;
+export const CURRENT_SAVE_VERSION = 3;
 
 export type View =
   | "overview"
@@ -27,8 +27,8 @@ export type AirlineState = {
   icao: string;
   hub: Hub;
   strategy: Strategy;
-  aircraft: Aircraft;
-  route: RouteSeed;
+  aircraft: Aircraft | null;
+  route: RouteSeed | null;
   week: number;
   cash: number;
   reputation: number;
