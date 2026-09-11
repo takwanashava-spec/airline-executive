@@ -82,6 +82,26 @@ export function migrateCareer(
   }
 
   const timestamp = new Date().toISOString();
+  const legacyWeek = isFiniteNumber(value.week)
+    ? Math.max(1, Math.floor(value.week))
+    : 1;
+  const fallbackGameDate = new Date(
+    Date.UTC(
+      2026,
+      8,
+      6 + (legacyWeek - 1) * 7,
+      8,
+      0,
+      0,
+    ),
+  ).toISOString();
+  const gameDateTime =
+    typeof value.gameDateTime === "string" &&
+    Number.isFinite(
+      Date.parse(value.gameDateTime),
+    )
+      ? value.gameDateTime
+      : fallbackGameDate;
 
   return {
     ...(value as unknown as AirlineState),
@@ -98,6 +118,7 @@ export function migrateCareer(
       typeof value.updatedAt === "string"
         ? value.updatedAt
         : timestamp,
+    gameDateTime,
     ceoName:
       typeof value.ceoName === "string" &&
       value.ceoName.trim()
