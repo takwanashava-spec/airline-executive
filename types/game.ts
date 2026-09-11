@@ -5,7 +5,7 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 6;
+export const CURRENT_SAVE_VERSION = 7;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
 
@@ -23,6 +23,38 @@ export type AircraftMarket =
   | "new"
   | "used"
   | "lessor";
+
+export type InboxAction = {
+  id: "accept" | "revise" | "withdraw";
+  label: string;
+  requiresAmount?: boolean;
+};
+
+export type InboxMessage = {
+  id: string;
+  threadId: string;
+  category: "aircraft" | "auction" | "finance" | "operations";
+  senderName: string;
+  senderCompany: string;
+  subject: string;
+  body: string;
+  receivedAt: string;
+  priority: "normal" | "important" | "urgent";
+  status: "unread" | "read" | "resolved" | "expired";
+  responseDeadline?: string;
+  relatedBidId?: string;
+  actions: InboxAction[];
+};
+
+export type AuctionBid = {
+  id: string;
+  listingId: string;
+  amount: number;
+  placedAt: string;
+  decisionAt: string;
+  status: "pending" | "accepted" | "countered" | "rejected" | "withdrawn" | "completed";
+  counterAmount?: number;
+};
 
 export type FleetAircraft = {
   id: string;
@@ -45,7 +77,8 @@ export type View =
   | "overview"
   | "network"
   | "fleet"
-  | "finance";
+  | "finance"
+  | "inbox";
 
 export type AirlineState = {
   saveVersion: number;
@@ -63,6 +96,8 @@ export type AirlineState = {
   strategy: Strategy;
   aircraft: Aircraft | null;
   fleet: FleetAircraft[];
+  inbox: InboxMessage[];
+  auctionBids: AuctionBid[];
   route: RouteSeed | null;
   gameDateTime: string;
   week: number;

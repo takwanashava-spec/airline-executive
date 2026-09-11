@@ -19,6 +19,7 @@ import {
   GAME_MINUTES_PER_REAL_SECOND,
 } from "@/lib/game/simulation";
 import type { AirlineState, GameSpeed } from "@/types/game";
+import { markMessageRead, respondToAuctionMessage, submitAuctionBid } from "@/lib/game/auctions";
 
 type Screen = "opening" | "setup" | "game" | "exited";
 
@@ -126,6 +127,22 @@ export default function AirlineGame() {
     );
   };
 
+  const handleAuctionBid = (listingId: string, amount: number) => {
+    if (!game) return;
+    const result = submitAuctionBid(game, listingId, amount);
+    if (result.error) return void toast.error(result.error);
+    setGame(result.game);
+    toast.success("Bid submitted", { description: "Confirmation has been sent to your executive inbox." });
+  };
+
+  const handleMessageResponse = (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => {
+    if (!game) return;
+    const result = respondToAuctionMessage(game, messageId, action, amount);
+    if (result.error) return void toast.error(result.error);
+    setGame(result.game);
+    toast.success(action === "accept" ? "Transaction completed" : action === "revise" ? "Revised bid submitted" : "Correspondence closed");
+  };
+
   if (!loaded) {
     return (
       <div className="loading-screen">
@@ -188,6 +205,9 @@ export default function AirlineGame() {
       onAcquireAircraft={
         handleAcquireAircraft
       }
+      onAuctionBid={handleAuctionBid}
+      onReadMessage={(messageId) => setGame((current) => current ? markMessageRead(current, messageId) : current)}
+      onRespondToMessage={handleMessageResponse}
     />
   );
 }

@@ -9,6 +9,7 @@ import {
   Plane,
   ShieldCheck,
   ShoppingCart,
+  Gavel,
 } from "lucide-react";
 
 import { ManufacturerLogo } from "@/components/game/manufacturer-logo";
@@ -23,6 +24,7 @@ import {
   type AircraftAcquisitionMethod,
   type AircraftMarketOffer,
 } from "@/lib/game/fleet";
+import { auctionListings } from "@/lib/game/auctions";
 import type {
   AircraftMarket,
   AirlineState,
@@ -52,12 +54,14 @@ function manufacturerDetails(
 export function FleetView({
   game,
   onAcquireAircraft,
+  onAuctionBid,
 }: {
   game: AirlineState;
   onAcquireAircraft: (
     offerId: string,
     method: AircraftAcquisitionMethod,
   ) => void;
+  onAuctionBid: (listingId: string, amount: number) => void;
 }) {
   const [market, setMarket] =
     useState<AircraftMarket>("new");
@@ -67,6 +71,7 @@ export function FleetView({
   ] = useState<AircraftManufacturerId | null>(
     null,
   );
+  const [usedSection, setUsedSection] = useState<"dealer" | "auction">("dealer");
   const primaryAircraft =
     game.fleet[0] ?? null;
   const ownedCount = game.fleet.filter(
@@ -388,7 +393,60 @@ export function FleetView({
               : "Operating leases require a three-month deposit and create a continuing monthly commitment."}
         </p>
 
-        {selectedManufacturer === null ? (
+        {market === "used" && (
+          <div className="used-market-switch" aria-label="Used aircraft sales channel">
+            <button type="button" className={usedSection === "dealer" ? "active" : ""} onClick={() => { setUsedSection("dealer"); setSelectedManufacturer(null); }}>Dealer listings</button>
+            <button type="button" className={usedSection === "auction" ? "active" : ""} onClick={() => { setUsedSection("auction"); setSelectedManufacturer(null); }}><Gavel /> Auction market</button>
+          </div>
+        )}
+
+        {market === "used" && usedSection === "auction" ? (
+          selectedManufacturer === null ? (
+            <div className="manufacturer-directory">
+              {[...new Set(auctionListings.map((listing) => listing.manufacturer))].map((manufacturer) => {
+                const details = manufacturerDetails(manufacturer);
+                const count = auctionListings.filter((listing) => listing.manufacturer === manufacturer).length;
+                return <button type="button" className="manufacturer-directory-card" key={manufacturer} onClick={() => setSelectedManufacturer(manufacturer)}>
+                  <ManufacturerLogo manufacturerId={manufacturer} />
+                  <div><span>{details.fullName}</span><h3>{details.name} auction inventory</h3><small>{count} individual airframe{count === 1 ? "" : "s"}</small></div>
+                  <footer><span><strong>{count}</strong> live auction listing{count === 1 ? "" : "s"}</span><ChevronRight /></footer>
+                </button>;
+              })}
+            </div>
+          ) : <>
+          <div className="manufacturer-showroom-nav">
+            <button type="button" onClick={() => setSelectedManufacturer(null)}><ChevronLeft />All manufacturers</button>
+            <span>{manufacturerDetails(selectedManufacturer).name} auction inventory</span>
+          </div>
+          <div className="auction-grid">
+            {auctionListings.filter((listing) => listing.manufacturer === selectedManufacturer).map((listing) => {
+              const pending = game.auctionBids.some((bid) => bid.listingId === listing.id && bid.status === "pending");
+              return <article className="auction-card" key={listing.id}>
+                <header><span>LIVE AUCTION</span><strong>{listing.registration}</strong></header>
+                <div className="market-aircraft-icon"><Gavel /></div>
+                <h3>{listing.aircraft.model}</h3>
+                <p>{listing.seller} · {listing.location}</p>
+                <dl>
+                  <div><dt>Serial</dt><dd>{listing.serialNumber}</dd></div>
+                  <div><dt>Year</dt><dd>{listing.manufactureYear}</dd></div>
+                  <div><dt>Hours</dt><dd>{listing.flightHours.toLocaleString()}</dd></div>
+                  <div><dt>Cycles</dt><dd>{listing.flightCycles.toLocaleString()}</dd></div>
+                  <div><dt>Condition</dt><dd>{listing.condition}%</dd></div>
+                  <div><dt>Current bid</dt><dd>{formatMoney(listing.currentBid)}</dd></div>
+                </dl>
+                <Button className="gold-button" disabled={pending} onClick={() => {
+                  const value = window.prompt(`Enter a bid above ${formatMoney(listing.currentBid)}`);
+                  if (value === null) return;
+                  onAuctionBid(listing.id, Number(value.replace(/[^0-9.]/g, "")));
+                }}>{pending ? "Decision pending" : "Place bid"}</Button>
+                <small>A formal decision will arrive in your inbox within one game day.</small>
+              </article>;
+            })}
+          </div>
+          </>
+        ) : (
+
+        selectedManufacturer === null ? (
           <div className="manufacturer-directory">
             {manufacturers.map(
               (manufacturer) => {
@@ -771,6 +829,7 @@ export function FleetView({
           )}
             </div>
           </>
+        )}
         )}
       </article>
     </section>

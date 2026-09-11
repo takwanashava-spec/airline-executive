@@ -8,6 +8,7 @@ import {
   Globe2,
   LayoutDashboard,
   Menu,
+  Mail,
   Plane,
   Route,
   Settings,
@@ -20,6 +21,7 @@ import { Brand } from "@/components/brand";
 import { CommandCentre } from "@/components/game/command-centre";
 import { FinanceView } from "@/components/game/finance-view";
 import { FleetView } from "@/components/game/fleet-view";
+import { InboxView } from "@/components/game/inbox-view";
 import { NetworkView } from "@/components/game/network-view";
 import type { AircraftAcquisitionMethod } from "@/lib/game/fleet";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,7 @@ const navItems = [
   { id: "network" as View, label: "Network", icon: Route },
   { id: "fleet" as View, label: "Fleet", icon: Plane },
   { id: "finance" as View, label: "Finance", icon: BarChart3 },
+  { id: "inbox" as View, label: "Inbox", icon: Mail },
 ];
 
 export function GameShell({
@@ -42,6 +45,9 @@ export function GameShell({
   clockSpeed,
   onClockSpeedChange,
   onAcquireAircraft,
+  onAuctionBid,
+  onReadMessage,
+  onRespondToMessage,
 }: {
   game: AirlineState;
   clockSpeed: GameSpeed;
@@ -52,6 +58,9 @@ export function GameShell({
     offerId: string,
     method: AircraftAcquisitionMethod,
   ) => void;
+  onAuctionBid: (listingId: string, amount: number) => void;
+  onReadMessage: (messageId: string) => void;
+  onRespondToMessage: (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => void;
 }) {
   const [view, setView] = useState<View>("overview");
   const [mobileNav, setMobileNav] = useState(false);
@@ -118,6 +127,7 @@ export function GameShell({
             >
               <item.icon />
               <span>{item.label}</span>
+              {item.id === "inbox" && game.inbox.some((mail) => mail.status === "unread") && <em className="nav-unread">{game.inbox.filter((mail) => mail.status === "unread").length}</em>}
               {view === item.id && <i />}
             </button>
           ))}
@@ -260,9 +270,11 @@ export function GameShell({
               onAcquireAircraft={
                 onAcquireAircraft
               }
+              onAuctionBid={onAuctionBid}
             />
           )}
           {view === "finance" && <FinanceView game={game} />}
+          {view === "inbox" && <InboxView game={game} onRead={onReadMessage} onRespond={onRespondToMessage} />}
         </main>
       </div>
 

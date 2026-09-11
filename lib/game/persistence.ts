@@ -271,6 +271,12 @@ export function migrateCareer(
         : timestamp,
     gameDateTime,
     fleet,
+    inbox: Array.isArray(value.inbox)
+      ? (value.inbox as AirlineState["inbox"])
+      : [],
+    auctionBids: Array.isArray(value.auctionBids)
+      ? (value.auctionBids as AirlineState["auctionBids"])
+      : [],
     ceoName:
       typeof value.ceoName === "string" &&
       value.ceoName.trim()

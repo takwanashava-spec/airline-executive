@@ -831,3 +831,44 @@ button:focus-visible,input:focus-visible { outline:3px solid rgba(242,184,75,.45
     min-height: 205px;
   }
 }
+
+/* Executive inbox and used-aircraft auctions */
+.nav-unread { min-width: 20px; height: 20px; display: grid; place-items: center; margin-left: auto; padding: 0 .35rem; border-radius: 999px; background: #c78c2f; color: #fff; font-size: .62rem; font-style: normal; font-weight: 900; }
+.used-market-switch { width: max-content; display: flex; gap: .35rem; margin: 0 0 1rem; padding: .3rem; border-radius: 7px; background: #edf1f4; }
+.used-market-switch button { min-height: 38px; display: flex; align-items: center; gap: .35rem; padding: .5rem .85rem; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #627184; font-size: .72rem; font-weight: 800; }
+.used-market-switch button.active { border-color: #d8dfe5; background: #fff; color: #172a42; box-shadow: 0 3px 10px rgba(17,35,55,.07); }
+.used-market-switch svg { width: 15px; }
+.auction-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .85rem; }
+.auction-card { min-width: 0; display: flex; flex-direction: column; padding: 1.05rem; border: 1px solid #dce3e8; border-radius: 8px; background: linear-gradient(145deg,#fff,#f7f9fa); }
+.auction-card>header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; color: #8a671f; font-size: .6rem; font-weight: 850; letter-spacing: .08em; }
+.auction-card>header strong { color: #536274; font-family: var(--font-mono); }
+.auction-card h3 { margin: .25rem 0; color: #17283e; }
+.auction-card>p { min-height: 34px; margin: 0 0 .9rem; color: #758392; font-size: .68rem; line-height: 1.45; }
+.auction-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin: 0 0 1rem; }
+.auction-card dl div { display: flex; flex-direction: column; gap: .15rem; }
+.auction-card dt { color: #8793a0; font-size: .59rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.auction-card dd { margin: 0; color: #26384d; font-size: .76rem; font-weight: 750; }
+.auction-card>small { margin-top: .6rem; color: #7b8895; font-size: .63rem; line-height: 1.4; text-align: center; }
+.executive-inbox { min-height: 620px; display: grid; grid-template-columns: minmax(280px, .42fr) minmax(0,1fr); gap: .8rem; }
+.inbox-list,.inbox-reader { overflow: hidden; padding: 0; }
+.inbox-list .panel-heading { padding: 1rem; border-bottom: 1px solid #e2e7eb; }
+.inbox-list .panel-heading>strong { color: #9a6c22; font-size: .66rem; }
+.inbox-row { width: 100%; display: grid; grid-template-columns: 20px minmax(0,1fr); gap: .7rem; padding: .85rem 1rem; border: 0; border-bottom: 1px solid #e7ebee; background: #fff; color: #22354b; text-align: left; }
+.inbox-row:hover,.inbox-row.active { background: #f3f6f8; }
+.inbox-row.unread { box-shadow: inset 3px 0 #ca9134; }
+.inbox-row>svg { width: 17px; margin-top: .15rem; color: #7c8996; }
+.inbox-row>span { min-width: 0; display: flex; flex-direction: column; gap: .18rem; }
+.inbox-row strong,.inbox-row b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inbox-row strong { font-size: .66rem; }.inbox-row b { font-size: .73rem; }.inbox-row small { color: #8a96a2; font-size: .59rem; }
+.inbox-reader { display: flex; flex-direction: column; }
+.inbox-reader>header { padding: 1.35rem 1.5rem; border-bottom: 1px solid #e1e6ea; }
+.inbox-reader h2 { margin: .5rem 0 .4rem; color: #17283e; font-size: 1.25rem; }
+.inbox-reader header p,.inbox-reader header small { margin: 0; color: #718090; font-size: .72rem; }
+.mail-priority { padding: .23rem .42rem; border-radius: 999px; background: #edf1f4; color: #687789; font-size: .56rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.mail-priority.important { background: #fff1d8; color: #966316; }.mail-priority.urgent { background: #fbe5e3; color: #a33c35; }
+.mail-body { flex: 1; padding: 1.4rem 1.5rem; color: #33475c; font-size: .86rem; line-height: 1.65; }.mail-body p { margin: 0; }
+.mail-deadline { margin: 0 1.5rem 1rem; padding: .7rem .8rem; border-left: 3px solid #c98f31; background: #fff7e8; color: #6e5426; font-size: .7rem; }
+.inbox-reader>footer { display: flex; flex-wrap: wrap; gap: .55rem; padding: 1rem 1.5rem; border-top: 1px solid #e1e6ea; background: #f8fafb; }
+.inbox-empty { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .45rem; padding: 2rem; color: #7b8896; text-align: center; }.inbox-empty svg { width: 34px; }.inbox-empty strong { color: #31455a; }.inbox-empty span { max-width: 300px; font-size: .72rem; line-height: 1.5; }
+@media (max-width: 980px) { .auction-grid { grid-template-columns: 1fr; }.executive-inbox { grid-template-columns: 1fr; }.inbox-list { max-height: 330px; overflow-y: auto; } }
+@media (max-width: 560px) { .used-market-switch { width: 100%; }.used-market-switch button { flex: 1; justify-content: center; }.inbox-reader>header,.mail-body,.inbox-reader>footer { padding-left: 1rem; padding-right: 1rem; } }

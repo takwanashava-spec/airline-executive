@@ -60,12 +60,30 @@ test("registration creates a versioned career with a game clock", async () => {
   assert.equal(career.ceoName, "Alex Morgan");
   assert.equal(career.aircraft, null);
   assert.deepEqual(career.fleet, []);
+  assert.deepEqual(career.inbox, []);
+  assert.deepEqual(career.auctionBids, []);
   assert.equal(career.route, null);
   assert.equal(career.cash, career.strategy.capital);
   assert.equal(career.passengers, 0);
   assert.equal(career.lastProfit, 0);
   assert.ok(career.careerId);
   assert.ok(career.createdAt);
+});
+
+test("auction bids resolve through the executive inbox after one game day", async () => {
+  const career = await createTestCareer();
+  const { auctionListings, processAuctionDecisions, submitAuctionBid } = await vite.ssrLoadModule("/lib/game/auctions.ts");
+  const listing = auctionListings[0];
+  const submitted = submitAuctionBid(career, listing.id, listing.reservePrice);
+
+  assert.equal(submitted.error, null);
+  assert.equal(submitted.game.auctionBids[0].status, "pending");
+  assert.equal(submitted.game.inbox[0].status, "unread");
+
+  const resolved = processAuctionDecisions(submitted.game, submitted.game.auctionBids[0].decisionAt);
+  assert.equal(resolved.auctionBids[0].status, "accepted");
+  assert.match(resolved.inbox[0].subject, /Bid accepted/);
+  assert.equal(resolved.inbox[0].actions[0].id, "accept");
 });
 
 test("new aircraft market exposes complete manufacturer catalogues", async () => {
