@@ -1,5 +1,7 @@
 import vinext from "vinext";
 import { defineConfig } from "vite";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import hostingConfig from "./.openai/hosting.json";
 import { sites } from "./build/sites-vite-plugin";
 
@@ -10,6 +12,32 @@ const { d1, r2 } = hostingConfig;
 
 // macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
 const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
+const AIRPORT_DATA_MODULE_ID = "\0airport-data-js-prebuilt.airportdata";
+const airportDataEntry = createRequire(import.meta.url).resolve("airport-data-js");
+
+function airportDataPrebuiltPlugin() {
+  return {
+    name: "airline-executive:airport-data-prebuilt",
+    enforce: "pre" as const,
+    resolveId(id: string) {
+      return id === "airport-data-js" ? AIRPORT_DATA_MODULE_ID : null;
+    },
+    load(id: string) {
+      if (id !== AIRPORT_DATA_MODULE_ID) return null;
+
+      const commonJsBundle = readFileSync(airportDataEntry, "utf8");
+      const esmBundle = commonJsBundle
+        .replace(/^\(\(\)=>\{/, "const airportData=(()=>{")
+        .replace(/,module\.exports=i\}\)\(\);\s*$/, ";return i})();");
+
+      if (esmBundle === commonJsBundle) {
+        throw new Error("The airport catalogue bundle format has changed.");
+      }
+
+      return `${esmBundle}\nexport const { getAirportByIata, getAirportByIcao, getAutocompleteSuggestions, findNearbyAirports } = airportData;\nexport default airportData;`;
+    },
+  };
+}
 
 const localBindingConfig = {
   main: "./worker/index.ts",
@@ -51,10 +79,8 @@ export default defineConfig(async () => {
         ? { watch: { useFsEvents: false, usePolling: true } }
         : {}),
     },
-        optimizeDeps: {
-      exclude: ["airport-data-js"],
-    },
     plugins: [
+      airportDataPrebuiltPlugin(),
       vinext(),
       sites(),
       cloudflare({
