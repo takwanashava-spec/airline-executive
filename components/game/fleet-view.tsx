@@ -9,8 +9,13 @@ import {
   ShoppingCart,
 } from "lucide-react";
 
+import { ManufacturerLogo } from "@/components/game/manufacturer-logo";
 import { Button } from "@/components/ui/button";
-import { formatMoney } from "@/lib/game-data";
+import {
+  aircraftManufacturers,
+  formatMoney,
+  type AircraftManufacturerId,
+} from "@/lib/game-data";
 import {
   aircraftMarketOffers,
   type AircraftAcquisitionMethod,
@@ -29,6 +34,18 @@ const marketLabels: Record<
   used: "Used aircraft",
   lessor: "Lessors",
 };
+
+function manufacturerDetails(
+  manufacturerId: AircraftManufacturerId,
+) {
+  return (
+    aircraftManufacturers.find(
+      (manufacturer) =>
+        manufacturer.id ===
+        manufacturerId,
+    ) ?? aircraftManufacturers[0]
+  );
+}
 
 export function FleetView({
   game,
@@ -354,7 +371,7 @@ export function FleetView({
 
         <p className="aircraft-market-note">
           {market === "new"
-            ? "Factory-new aircraft are available for cash purchase or long-term finance."
+            ? "Browse the current passenger-aircraft programmes of ATR, Embraer, Airbus and Boeing. Aircraft still in development are displayed but cannot yet be delivered."
             : market === "used"
               ? "Pre-owned aircraft trade at lower prices, with age, utilisation and condition affecting value."
               : "Operating leases require a three-month deposit and create a continuing monthly commitment."}
@@ -368,11 +385,35 @@ export function FleetView({
                 key={manufacturer}
               >
                 <header>
-                  <div>
-                    <span>MANUFACTURER</span>
-                    <h3>{manufacturer}</h3>
+                  <ManufacturerLogo
+                    manufacturerId={
+                      manufacturer
+                    }
+                  />
+                  <div className="manufacturer-market-identity">
+                    <span>
+                      {
+                        manufacturerDetails(
+                          manufacturer,
+                        ).fullName
+                      }
+                    </span>
+                    <h3>
+                      {
+                        manufacturerDetails(
+                          manufacturer,
+                        ).division
+                      }
+                    </h3>
+                    <small>
+                      {
+                        manufacturerDetails(
+                          manufacturer,
+                        ).headquarters
+                      }
+                    </small>
                   </div>
-                  <small>
+                  <small className="manufacturer-offer-count">
                     {
                       visibleOffers.filter(
                         (offer) =>
@@ -380,7 +421,7 @@ export function FleetView({
                           manufacturer,
                       ).length
                     }{" "}
-                    available
+                    models
                   </small>
                 </header>
 
@@ -392,12 +433,18 @@ export function FleetView({
                         manufacturer,
                     )
                     .map((offer) => {
+                      const unavailable =
+                        offer.aircraft
+                          .availability ===
+                        "development";
                       const cashAffordable =
+                        !unavailable &&
                         game.cash >=
-                        offer.cashPrice;
+                          offer.cashPrice;
                       const financeAffordable =
+                        !unavailable &&
                         game.cash >=
-                        offer.financeDeposit;
+                          offer.financeDeposit;
                       const leaseDeposit =
                         offer.monthlyLease * 3;
                       const leaseAffordable =
@@ -413,9 +460,26 @@ export function FleetView({
                             <Plane />
                           </div>
 
-                          <span>
-                            {offer.provider}
-                          </span>
+                          <div className="aircraft-offer-meta">
+                            <span>
+                              {offer.provider}
+                            </span>
+                            <em
+                              className={
+                                offer.aircraft
+                                  .availability ===
+                                "development"
+                                  ? "development"
+                                  : ""
+                              }
+                            >
+                              {offer.aircraft
+                                .availability ===
+                              "development"
+                                ? "In development"
+                                : "In production"}
+                            </em>
+                          </div>
                           <h3>
                             {offer.aircraft.model}
                           </h3>
@@ -462,6 +526,15 @@ export function FleetView({
                                     .reliability
                                 }
                                 %
+                              </dd>
+                            </div>
+                            <div className="aircraft-engine-spec">
+                              <dt>Engine</dt>
+                              <dd>
+                                {
+                                  offer.aircraft
+                                    .engine
+                                }
                               </dd>
                             </div>
                           </dl>
@@ -535,9 +608,11 @@ export function FleetView({
                                     )
                                   }
                                 >
-                                  {cashAffordable
-                                    ? "Buy cash"
-                                    : "Cash unavailable"}
+                                  {unavailable
+                                    ? "Not yet deliverable"
+                                    : cashAffordable
+                                      ? "Buy cash"
+                                      : "Cash unavailable"}
                                 </Button>
 
                                 <Button
@@ -553,9 +628,11 @@ export function FleetView({
                                   }
                                 >
                                   <ShoppingCart />
-                                  {financeAffordable
-                                    ? "Finance"
-                                    : "Deposit unavailable"}
+                                  {unavailable
+                                    ? "Not yet deliverable"
+                                    : financeAffordable
+                                      ? "Finance"
+                                      : "Deposit unavailable"}
                                 </Button>
                               </div>
 
