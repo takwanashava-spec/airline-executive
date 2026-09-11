@@ -292,6 +292,12 @@ export function migrateCareer(
     fleetTasks: Array.isArray(value.fleetTasks)
       ? (value.fleetTasks as AirlineState["fleetTasks"])
       : [],
+    routePlans: Array.isArray(value.routePlans)
+      ? (value.routePlans as AirlineState["routePlans"])
+      : [],
+    slotApplications: Array.isArray(value.slotApplications)
+      ? (value.slotApplications as AirlineState["slotApplications"])
+      : [],
     ceoName:
       typeof value.ceoName === "string" &&
       value.ceoName.trim()

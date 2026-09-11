@@ -25,6 +25,7 @@ import { InboxView } from "@/components/game/inbox-view";
 import { NetworkView } from "@/components/game/network-view";
 import type { AircraftAcquisitionMethod } from "@/lib/game/fleet";
 import type { FleetAction } from "@/lib/game/fleet-operations";
+import type { RoutePlanInput } from "@/lib/game/routes";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import type {
@@ -54,6 +55,7 @@ export function GameShell({
   onUsedBuy,
   onUsedWatchlist,
   onFleetAction,
+  onSubmitSlotApplication,
   onReadMessage,
   onRespondToMessage,
 }: {
@@ -74,6 +76,7 @@ export function GameShell({
   onUsedBuy: (listingId: string) => void;
   onUsedWatchlist: (listingId: string) => void;
   onFleetAction: (aircraftId: string, action: FleetAction, option?: string) => void;
+  onSubmitSlotApplication: (input: RoutePlanInput) => void;
   onReadMessage: (messageId: string) => void;
   onRespondToMessage: (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => void;
 }) {
@@ -278,7 +281,7 @@ export function GameShell({
           </div>
 
           {view === "overview" && <CommandCentre game={game} />}
-          {view === "network" && <NetworkView game={game} />}
+          {view === "network" && <NetworkView game={game} onSubmitSlotApplication={onSubmitSlotApplication} />}
           {view === "fleet" && (
             <FleetView
               game={game}

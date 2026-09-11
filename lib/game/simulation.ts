@@ -3,6 +3,7 @@ import { processAuctionDecisions } from "@/lib/game/auctions";
 import { processLeaseDecisions } from "@/lib/game/leasing";
 import { processUsedAircraftTransactions } from "@/lib/game/used-aircraft";
 import { processFleetTasks } from "@/lib/game/fleet-operations";
+import { processSlotApplications } from "@/lib/game/routes";
 
 export const GAME_MINUTES_PER_REAL_SECOND =
   1 / 60;
@@ -80,8 +81,13 @@ export function advanceCareerClock(
     new Date(nextGameTime).toISOString(),
   );
 
-  return processFleetTasks(
+  const fleetGame = processFleetTasks(
     usedAircraftGame,
+    new Date(nextGameTime).toISOString(),
+  );
+
+  return processSlotApplications(
+    fleetGame,
     new Date(nextGameTime).toISOString(),
   );
 }
@@ -91,7 +97,10 @@ export function advanceCareerWeek(
 ): WeekResult {
   const nextWeek = currentGame.week + 1;
 
-  if (!currentGame.aircraft || !currentGame.route) {
+  const activePlans = currentGame.routePlans.filter((plan) => plan.status === "active");
+  const hasLegacyOperation = currentGame.aircraft && currentGame.route;
+
+  if (activePlans.length === 0 && !hasLegacyOperation) {
     return {
       game: {
         ...currentGame,
@@ -145,26 +154,27 @@ export function advanceCareerWeek(
     ),
   );
 
-  const sectors =
-    currentGame.route.weeklyFlights * 2;
+  const operations = activePlans.length > 0
+    ? activePlans.map((plan) => ({
+        route: plan,
+        aircraft: currentGame.fleet.find((item) => item.id === plan.aircraftId)?.aircraft,
+      })).filter((item) => item.aircraft)
+    : [{ route: currentGame.route!, aircraft: currentGame.aircraft! }];
 
-  const passengers = Math.round(
-    sectors *
-      currentGame.aircraft.seats *
-      (nextLoad / 100),
-  );
+  let passengers = 0;
+  let revenue = 0;
+  let fuelCost = 0;
+  let sectors = 0;
 
-  const revenue =
-    passengers *
-    currentGame.route.baseFare *
-    currentGame.strategy.fareMultiplier;
-
-  const fuelCost =
-    sectors *
-    currentGame.route.distance *
-    currentGame.aircraft.fuelBurn *
-    10.8 *
-    (fuelIndex / 100);
+  operations.forEach(({ route, aircraft }) => {
+    if (!aircraft) return;
+    const routeSectors = route.weeklyFlights * 2;
+    const routePassengers = Math.round(routeSectors * aircraft.seats * (nextLoad / 100));
+    sectors += routeSectors;
+    passengers += routePassengers;
+    revenue += routePassengers * route.baseFare * currentGame.strategy.fareMultiplier;
+    fuelCost += routeSectors * route.distance * aircraft.fuelBurn * 10.8 * (fuelIndex / 100);
+  });
 
   const monthlyAircraftCommitments =
     currentGame.fleet.reduce(

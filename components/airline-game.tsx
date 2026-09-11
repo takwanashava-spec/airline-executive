@@ -23,6 +23,7 @@ import { markMessageRead, respondToAuctionMessage, submitAuctionBid } from "@/li
 import { respondToLeaseMessage, submitLeaseApplication } from "@/lib/game/leasing";
 import { applyForUsedAircraftFinance, buyUsedAircraftNow, requestUsedAircraftInspection, respondToUsedAircraftMessage, submitUsedAircraftOffer, toggleUsedAircraftWatchlist } from "@/lib/game/used-aircraft";
 import { performFleetAction, type FleetAction } from "@/lib/game/fleet-operations";
+import { respondToSlotMessage, submitSlotApplication, type RoutePlanInput } from "@/lib/game/routes";
 
 type Screen = "opening" | "setup" | "game" | "exited";
 
@@ -141,7 +142,9 @@ export default function AirlineGame() {
   const handleMessageResponse = (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => {
     if (!game) return;
     const message = game.inbox.find((item) => item.id === messageId);
-    const result = message?.category === "used-aircraft"
+    const result = message?.category === "network"
+      ? respondToSlotMessage(game, messageId, action)
+      : message?.category === "used-aircraft"
       ? respondToUsedAircraftMessage(game, messageId, action, amount)
       : message?.category === "finance"
       ? respondToLeaseMessage(game, messageId, action, amount)
@@ -171,6 +174,14 @@ export default function AirlineGame() {
     if (result.error) return void toast.error(result.error);
     setGame(result.game);
     toast.success(action.includes("maintenance") || action.includes("check") ? "Maintenance scheduled" : "Fleet work scheduled", { description: "Progress will update with the game clock." });
+  };
+
+  const handleSlotApplication = (input: RoutePlanInput) => {
+    if (!game) return;
+    const result = submitSlotApplication(game, input);
+    if (result.error) return void toast.error(result.error);
+    setGame(result.game);
+    toast.success("Slot application submitted", { description: "Airport coordination will respond through your inbox within one game day." });
   };
 
   if (!loaded) {
@@ -243,6 +254,7 @@ export default function AirlineGame() {
       onUsedBuy={(listingId) => applyUsedResult(buyUsedAircraftNow(game, listingId), "Purchase completed")}
       onUsedWatchlist={(listingId) => setGame(toggleUsedAircraftWatchlist(game, listingId))}
       onFleetAction={handleFleetAction}
+      onSubmitSlotApplication={handleSlotApplication}
       onReadMessage={(messageId) => setGame((current) => current ? markMessageRead(current, messageId) : current)}
       onRespondToMessage={handleMessageResponse}
     />

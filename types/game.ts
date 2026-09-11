@@ -5,7 +5,7 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 10;
+export const CURRENT_SAVE_VERSION = 11;
 
 export type GameSpeed = 0 | 1 | 60 | 360;
 
@@ -50,7 +50,7 @@ export type InboxAction = {
 export type InboxMessage = {
   id: string;
   threadId: string;
-  category: "aircraft" | "used-aircraft" | "auction" | "finance" | "operations";
+  category: "aircraft" | "used-aircraft" | "auction" | "finance" | "operations" | "network";
   senderName: string;
   senderCompany: string;
   subject: string;
@@ -61,6 +61,33 @@ export type InboxMessage = {
   responseDeadline?: string;
   relatedBidId?: string;
   actions: InboxAction[];
+};
+
+export type RoutePlan = {
+  id: string;
+  from: string;
+  destination: Hub;
+  distance: number;
+  blockTime: string;
+  demand: number;
+  competition: "Low" | "Medium" | "High";
+  weeklyFlights: number;
+  baseFare: number;
+  departureTime: string;
+  operatingDays: number[];
+  aircraftId: string;
+  createdAt: string;
+  status: "draft" | "slots-pending" | "slots-offered" | "active" | "rejected" | "withdrawn";
+};
+
+export type SlotApplication = {
+  id: string;
+  routePlanId: string;
+  submittedAt: string;
+  decisionAt: string;
+  status: "pending" | "approved" | "countered" | "rejected" | "accepted" | "withdrawn";
+  requestedTime: string;
+  offeredTime?: string;
 };
 
 export type AuctionBid = {
@@ -155,6 +182,8 @@ export type AirlineState = {
   inspectedUsedAircraft: string[];
   usedAircraftWatchlist: string[];
   fleetTasks: FleetTask[];
+  routePlans: RoutePlan[];
+  slotApplications: SlotApplication[];
   route: RouteSeed | null;
   gameDateTime: string;
   week: number;

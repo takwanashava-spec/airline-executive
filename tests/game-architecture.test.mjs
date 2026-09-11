@@ -67,12 +67,49 @@ test("registration creates a versioned career with a game clock", async () => {
   assert.deepEqual(career.inspectedUsedAircraft, []);
   assert.deepEqual(career.usedAircraftWatchlist, []);
   assert.deepEqual(career.fleetTasks, []);
+  assert.deepEqual(career.routePlans, []);
+  assert.deepEqual(career.slotApplications, []);
   assert.equal(career.route, null);
   assert.equal(career.cash, career.strategy.capital);
   assert.equal(career.passengers, 0);
   assert.equal(career.lastProfit, 0);
   assert.ok(career.careerId);
   assert.ok(career.createdAt);
+});
+
+test("route plans receive a slot decision and launch through the inbox", async () => {
+  const career = await createTestCareer();
+  const { purchaseAircraft } = await vite.ssrLoadModule("/lib/game/fleet.ts");
+  const { processSlotApplications, respondToSlotMessage, submitSlotApplication } = await vite.ssrLoadModule("/lib/game/routes.ts");
+  const purchased = purchaseAircraft(career, "ATR 72-600").game;
+  const ready = {
+    ...purchased,
+    fleet: purchased.fleet.map((item) => ({ ...item, status: "parked", inductionStage: "complete", baseCode: career.hub.code })),
+  };
+  const destination = {
+    ...career.hub,
+    code: "CPT",
+    icao: "FACT",
+    city: "Cape Town",
+    name: "Cape Town International",
+    latitude: -33.97,
+    longitude: 18.6,
+    slotPressure: "Medium",
+    availableSlotsPercent: 28,
+    passengerDemand: 84,
+    coordinates: { x: 54, y: 77 },
+  };
+  const submitted = submitSlotApplication(ready, { destination, aircraftId: ready.fleet[0].id, weeklyFlights: 7, baseFare: 1850, departureTime: "08:00", operatingDays: [0, 1, 2, 3, 4, 5, 6] });
+  assert.equal(submitted.error, null);
+  assert.equal(submitted.game.routePlans[0].status, "slots-pending");
+  const decided = processSlotApplications(submitted.game, submitted.game.slotApplications[0].decisionAt);
+  assert.equal(decided.slotApplications[0].status, "approved");
+  assert.match(decided.inbox[0].subject, /Slots approved/);
+  const launched = respondToSlotMessage(decided, decided.inbox[0].id, "accept");
+  assert.equal(launched.error, null);
+  assert.equal(launched.game.routePlans[0].status, "active");
+  assert.equal(launched.game.fleet[0].status, "active");
+  assert.equal(launched.game.route.to, "CPT");
 });
 
 test("fleet induction and maintenance progress on the game clock", async () => {
