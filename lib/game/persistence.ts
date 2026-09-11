@@ -1,6 +1,7 @@
 import {
   CURRENT_SAVE_VERSION,
   type AirlineState,
+  type FleetAircraft,
 } from "@/types/game";
 
 export const STORAGE_KEY =
@@ -23,6 +24,102 @@ function isFiniteNumber(value: unknown) {
     typeof value === "number" &&
     Number.isFinite(value)
   );
+}
+
+function migrateFleetAircraft(
+  value: unknown,
+  index: number,
+  fallbackDate: string,
+): FleetAircraft | null {
+  if (
+    !isRecord(value) ||
+    typeof value.id !== "string" ||
+    typeof value.registration !== "string" ||
+    !isRecord(value.aircraft)
+  ) {
+    return null;
+  }
+
+  const purchasePrice = isFiniteNumber(
+    value.purchasePrice,
+  )
+    ? value.purchasePrice
+    : 0;
+  const acquisitionType =
+    value.acquisitionType === "owned" ||
+    value.acquisitionType === "leased" ||
+    value.acquisitionType === "financed"
+      ? value.acquisitionType
+      : purchasePrice > 0
+        ? "owned"
+        : "leased";
+  const market =
+    value.market === "new" ||
+    value.market === "used" ||
+    value.market === "lessor"
+      ? value.market
+      : acquisitionType === "leased"
+        ? "lessor"
+        : "new";
+  const legacyMonthlyLease =
+    isFiniteNumber(
+      value.aircraft.monthlyLease,
+    )
+      ? value.aircraft.monthlyLease
+      : 0;
+
+  return {
+    ...(value as unknown as FleetAircraft),
+    id:
+      value.id ||
+      `aircraft-${index + 1}`,
+    registration: value.registration,
+    aircraft:
+      value.aircraft as unknown as FleetAircraft["aircraft"],
+    acquiredAt:
+      typeof value.acquiredAt === "string"
+        ? value.acquiredAt
+        : fallbackDate,
+    purchasePrice,
+    condition: isFiniteNumber(value.condition)
+      ? value.condition
+      : 100,
+    status:
+      value.status === "active" ||
+      value.status === "maintenance"
+        ? value.status
+        : "parked",
+    acquisitionType,
+    market,
+    provider:
+      typeof value.provider === "string"
+        ? value.provider
+        : acquisitionType === "leased"
+          ? "Legacy lease contract"
+          : "Aircraft market",
+    monthlyPayment: isFiniteNumber(
+      value.monthlyPayment,
+    )
+      ? value.monthlyPayment
+      : acquisitionType === "leased"
+        ? legacyMonthlyLease
+        : 0,
+    outstandingBalance: isFiniteNumber(
+      value.outstandingBalance,
+    )
+      ? value.outstandingBalance
+      : 0,
+    manufactureYear: isFiniteNumber(
+      value.manufactureYear,
+    )
+      ? value.manufactureYear
+      : 2026,
+    flightHours: isFiniteNumber(
+      value.flightHours,
+    )
+      ? value.flightHours
+      : 0,
+  };
 }
 
 function hasCoreCareerFields(
@@ -71,6 +168,13 @@ function createCareerId() {
     .slice(2, 10)}`;
 }
 
+function shiftClock(time: unknown, minutes: number) {
+  if (typeof time !== "string" || !/^\d{2}:\d{2}$/.test(time)) return "12:00";
+  const [hours, mins] = time.split(":").map(Number);
+  const total = (hours * 60 + mins + minutes) % 1_440;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 export function migrateCareer(
   value: unknown,
 ): AirlineState | null {
@@ -82,6 +186,80 @@ export function migrateCareer(
   }
 
   const timestamp = new Date().toISOString();
+  const legacyWeek = isFiniteNumber(value.week)
+    ? Math.max(1, Math.floor(value.week))
+    : 1;
+  const fallbackGameDate = new Date(
+    Date.UTC(
+      2026,
+      8,
+      6 + (legacyWeek - 1) * 7,
+      8,
+      0,
+      0,
+    ),
+  ).toISOString();
+  const gameDateTime =
+    typeof value.gameDateTime === "string" &&
+    Number.isFinite(
+      Date.parse(value.gameDateTime),
+    )
+      ? value.gameDateTime
+      : fallbackGameDate;
+
+  const legacyAircraft = isRecord(
+    value.aircraft,
+  )
+    ? value.aircraft
+    : null;
+  const fleet: FleetAircraft[] =
+    Array.isArray(value.fleet)
+      ? value.fleet
+          .map((item, index) =>
+            migrateFleetAircraft(
+              item,
+              index,
+              gameDateTime,
+            ),
+          )
+          .filter(
+            (
+              item,
+            ): item is FleetAircraft =>
+              item !== null,
+          )
+      : legacyAircraft
+        ? [
+            {
+              id: "legacy-aircraft-001",
+              registration: `${value.icao}-001`,
+              aircraft:
+                legacyAircraft as unknown as FleetAircraft["aircraft"],
+              acquiredAt: gameDateTime,
+              purchasePrice: 0,
+              condition: isFiniteNumber(
+                value.aircraftCondition,
+              )
+                ? value.aircraftCondition
+                : 100,
+              status: isRecord(value.route)
+                ? "active"
+                : "parked",
+              acquisitionType: "leased",
+              market: "lessor",
+              provider: "Legacy lease contract",
+              monthlyPayment:
+                isFiniteNumber(
+                  legacyAircraft.monthlyLease,
+                )
+                  ? legacyAircraft.monthlyLease
+                  : 0,
+              outstandingBalance: 0,
+              manufactureYear: 2026,
+              flightHours: 0,
+            },
+          ]
+        : [];
 
   return {
     ...(value as unknown as AirlineState),
@@ -98,6 +276,45 @@ export function migrateCareer(
       typeof value.updatedAt === "string"
         ? value.updatedAt
         : timestamp,
+    gameDateTime,
+    fleet,
+    inbox: Array.isArray(value.inbox)
+      ? (value.inbox as AirlineState["inbox"])
+      : [],
+    auctionBids: Array.isArray(value.auctionBids)
+      ? (value.auctionBids as AirlineState["auctionBids"])
+      : [],
+    leaseApplications: Array.isArray(value.leaseApplications)
+      ? (value.leaseApplications as AirlineState["leaseApplications"])
+      : [],
+    usedAircraftTransactions: Array.isArray(value.usedAircraftTransactions)
+      ? (value.usedAircraftTransactions as AirlineState["usedAircraftTransactions"])
+      : [],
+    inspectedUsedAircraft: Array.isArray(value.inspectedUsedAircraft)
+      ? (value.inspectedUsedAircraft as string[])
+      : [],
+    usedAircraftWatchlist: Array.isArray(value.usedAircraftWatchlist)
+      ? (value.usedAircraftWatchlist as string[])
+      : [],
+    fleetTasks: Array.isArray(value.fleetTasks)
+      ? (value.fleetTasks as AirlineState["fleetTasks"])
+      : [],
+    routePlans: Array.isArray(value.routePlans)
+      ? (value.routePlans as UnknownRecord[]).filter(isRecord).map((plan, index) => ({
+          ...(plan as unknown as AirlineState["routePlans"][number]),
+          returnDepartureTime: typeof plan.returnDepartureTime === "string" ? plan.returnDepartureTime : shiftClock(plan.departureTime, 240),
+          turnaroundMinutes: isFiniteNumber(plan.turnaroundMinutes) ? plan.turnaroundMinutes : 45,
+          outboundFlightNumber: typeof plan.outboundFlightNumber === "string" ? plan.outboundFlightNumber : `${typeof value.iata === "string" ? value.iata : "AE"}${101 + index * 2}`,
+          returnFlightNumber: typeof plan.returnFlightNumber === "string" ? plan.returnFlightNumber : `${typeof value.iata === "string" ? value.iata : "AE"}${102 + index * 2}`,
+        }))
+      : [],
+    slotApplications: Array.isArray(value.slotApplications)
+      ? (value.slotApplications as UnknownRecord[]).filter(isRecord).map((application) => ({
+          ...(application as unknown as AirlineState["slotApplications"][number]),
+          requestedReturnTime: typeof application.requestedReturnTime === "string" ? application.requestedReturnTime : shiftClock(application.requestedTime, 240),
+          offeredReturnTime: typeof application.offeredReturnTime === "string" ? application.offeredReturnTime : undefined,
+        }))
+      : [],
     ceoName:
       typeof value.ceoName === "string" &&
       value.ceoName.trim()

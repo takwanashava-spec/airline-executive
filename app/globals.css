@@ -212,3 +212,750 @@ button:focus-visible,input:focus-visible { outline:3px solid rgba(242,184,75,.45
   .airport-search-results button { grid-template-columns:48px minmax(0,1fr); }
   .airport-search-results button em { display:none; }
 }
+
+
+.fleet-page {
+  display: grid;
+  gap: .8rem;
+}
+
+.fleet-market-panel {
+  padding: 1.25rem;
+}
+
+.fleet-market-cash {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .2rem;
+}
+
+.fleet-market-cash span,
+.aircraft-market-card > span,
+.aircraft-market-price span {
+  color: #8793a0;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+
+.fleet-market-cash strong {
+  color: #1a2b40;
+  font-size: 1.05rem;
+}
+
+.aircraft-market-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.aircraft-market-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 1.1rem;
+  border: 1px solid #dfe5ea;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #fff, #f8fafb);
+}
+
+.market-aircraft-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background: #10243b;
+  color: #dba13b;
+}
+
+.market-aircraft-icon svg {
+  width: 27px;
+  transform: rotate(-8deg);
+}
+
+.aircraft-market-card h3 {
+  margin: .35rem 0 1rem;
+  color: #18283d;
+  font-size: 1.05rem;
+}
+
+.aircraft-market-card dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .7rem;
+  margin: 0 0 1rem;
+}
+
+.aircraft-market-card dl div {
+  display: flex;
+  flex-direction: column;
+  gap: .16rem;
+}
+
+.aircraft-market-card dt {
+  color: #8a95a2;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.aircraft-market-card dd {
+  margin: 0;
+  color: #26384d;
+  font-size: .78rem;
+  font-weight: 750;
+}
+
+.aircraft-market-price {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  margin-top: auto;
+  padding: .85rem 0;
+  border-top: 1px solid #e4e9ed;
+}
+
+.aircraft-market-price strong {
+  color: #1c775f;
+  font-size: 1.05rem;
+}
+
+.aircraft-market-card .gold-button {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .aircraft-market-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .fleet-market-panel {
+    padding: .9rem;
+  }
+
+  .fleet-market-panel .panel-heading {
+    align-items: flex-start;
+    gap: .75rem;
+  }
+
+  .fleet-market-cash {
+    align-items: flex-start;
+  }
+}
+
+
+/* Aircraft ownership and acquisition markets */
+.fleet-ownership-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .7rem;
+}
+
+.fleet-ownership-summary article {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .38rem;
+  padding: .9rem 1rem;
+  border: 1px solid #dfe5ea;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(20, 38, 59, .04);
+}
+
+.fleet-ownership-summary span {
+  color: #8793a0;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+
+.fleet-ownership-summary strong {
+  overflow: hidden;
+  color: #17283e;
+  font-size: 1.12rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aircraft-market-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .55rem;
+  margin-bottom: .9rem;
+  padding: .35rem;
+  border-radius: 8px;
+  background: #eef2f5;
+}
+
+.aircraft-market-tabs button {
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: .14rem;
+  padding: .7rem .9rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #627184;
+  text-align: left;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.aircraft-market-tabs button:hover {
+  background: rgba(255, 255, 255, .65);
+}
+
+.aircraft-market-tabs button.active {
+  border-color: #d9e0e6;
+  background: #fff;
+  color: #172a42;
+  box-shadow: 0 4px 12px rgba(17, 35, 55, .07);
+}
+
+.aircraft-market-tabs span {
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.aircraft-market-tabs small {
+  color: #8a96a3;
+  font-size: .62rem;
+}
+
+.aircraft-market-note {
+  margin: 0 0 1.2rem;
+  color: #6d7b8b;
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.manufacturer-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.manufacturer-market {
+  overflow: hidden;
+  border: 1px solid #dfe5ea;
+  border-radius: 9px;
+  background: #f8fafb;
+}
+
+.manufacturer-market > header {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 1rem;
+  border-bottom: 1px solid #e1e6ea;
+  background: #fff;
+}
+
+.manufacturer-market-identity {
+  display: flex;
+  align-items: baseline;
+  gap: .65rem;
+}
+
+.manufacturer-market-identity > span {
+  color: #9a6c22;
+  font-size: .56rem;
+  font-weight: 850;
+  letter-spacing: .1em;
+}
+
+.manufacturer-market-identity h3 {
+  margin: 0;
+  color: #17283e;
+  font-size: 1.02rem;
+}
+
+.manufacturer-market-identity small {
+  color: #8793a0;
+  font-size: .64rem;
+}
+
+.manufacturer-market .aircraft-market-grid {
+  padding: .85rem;
+}
+
+.aircraft-market-price small {
+  color: #7b8895;
+  font-size: .66rem;
+}
+
+.aircraft-acquisition-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+}
+
+.aircraft-acquisition-actions button {
+  width: 100%;
+}
+
+.finance-terms {
+  min-height: 28px;
+  display: block;
+  padding-top: .55rem;
+  color: #7c8997;
+  font-size: .62rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+@media (max-width: 1200px) {
+  .fleet-ownership-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .fleet-ownership-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .aircraft-market-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .manufacturer-market-identity {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  .aircraft-acquisition-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Manufacturer showrooms */
+.manufacturer-logo {
+  width: 156px;
+  min-width: 156px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  padding: .55rem .75rem;
+  border: 1px solid #dde4e9;
+  border-radius: 7px;
+  background: #fff;
+  font-weight: 900;
+  letter-spacing: .03em;
+}
+
+.manufacturer-logo svg {
+  width: 35px;
+  height: 30px;
+}
+
+.manufacturer-logo-atr {
+  border-color: #e1d8d8;
+}
+
+.manufacturer-logo-atr .atr-wordmark {
+  width: 86px;
+  display: grid;
+  place-items: center;
+  padding: .34rem .55rem;
+  border-radius: 3px;
+  background: #cf202f;
+  color: #fff;
+  font-size: 1.24rem;
+  letter-spacing: .14em;
+}
+
+.manufacturer-logo-embraer {
+  color: #123d78;
+  font-size: .86rem;
+}
+
+.manufacturer-logo-embraer svg {
+  fill: #123d78;
+}
+
+.manufacturer-logo-airbus {
+  color: #064a8e;
+  font-size: 1.05rem;
+}
+
+.manufacturer-logo-airbus svg {
+  fill: #064a8e;
+}
+
+.manufacturer-logo-boeing {
+  color: #174f91;
+  font-size: 1.02rem;
+}
+
+.manufacturer-logo-boeing svg {
+  overflow: visible;
+  fill: none;
+  stroke: #174f91;
+  stroke-width: 2;
+}
+
+.manufacturer-market-identity {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: .14rem;
+}
+
+.manufacturer-market-identity > span {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.manufacturer-offer-count {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.aircraft-offer-meta {
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .55rem;
+}
+
+.aircraft-offer-meta > span {
+  overflow: hidden;
+  color: #8793a0;
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aircraft-offer-meta em {
+  padding: .22rem .38rem;
+  border-radius: 999px;
+  background: #e8f4ef;
+  color: #23745e;
+  font-size: .55rem;
+  font-style: normal;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.aircraft-offer-meta em.development {
+  background: #fff1d7;
+  color: #9a6717;
+}
+
+.aircraft-market-card .aircraft-engine-spec {
+  grid-column: 1 / -1;
+}
+
+.aircraft-engine-spec dd {
+  line-height: 1.35;
+}
+
+@media (max-width: 680px) {
+  .manufacturer-market > header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .manufacturer-logo {
+    width: 132px;
+    min-width: 132px;
+  }
+
+  .manufacturer-market-identity {
+    flex: 1;
+  }
+
+  .manufacturer-offer-count {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+
+/* Manufacturer directory navigation */
+.manufacturer-directory {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.manufacturer-directory-card {
+  min-width: 0;
+  min-height: 225px;
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #dce3e8;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #fff, #f6f9fa);
+  color: #17283e;
+  text-align: left;
+  box-shadow: 0 5px 16px rgba(20, 38, 59, .04);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.manufacturer-directory-card:hover {
+  border-color: #c99336;
+  box-shadow: 0 12px 26px rgba(20, 38, 59, .1);
+  transform: translateY(-2px);
+}
+
+.manufacturer-directory-card .manufacturer-logo {
+  width: 100%;
+  min-width: 0;
+  height: 68px;
+}
+
+.manufacturer-directory-card > div:not(.manufacturer-logo) {
+  display: flex;
+  flex-direction: column;
+  gap: .26rem;
+}
+
+.manufacturer-directory-card > div > span {
+  color: #9a6c22;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .08em;
+  line-height: 1.35;
+}
+
+.manufacturer-directory-card h3 {
+  margin: 0;
+  color: #17283e;
+  font-size: .96rem;
+}
+
+.manufacturer-directory-card small {
+  color: #7e8a97;
+  font-size: .65rem;
+}
+
+.manufacturer-directory-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: auto;
+  padding-top: .75rem;
+  border-top: 1px solid #e1e7eb;
+  color: #748292;
+  font-size: .66rem;
+}
+
+.manufacturer-directory-card footer strong {
+  color: #193b5e;
+}
+
+.manufacturer-directory-card footer svg {
+  width: 17px;
+  color: #c2882e;
+}
+
+.manufacturer-showroom-nav {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .7rem;
+  padding: .45rem .65rem;
+  border: 1px solid #dfe5ea;
+  border-radius: 7px;
+  background: #f7f9fa;
+}
+
+.manufacturer-showroom-nav button {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .55rem;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #21476c;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.manufacturer-showroom-nav button:hover {
+  background: #e9eef2;
+}
+
+.manufacturer-showroom-nav button svg {
+  width: 16px;
+}
+
+.manufacturer-showroom-nav > span {
+  color: #7c8996;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+  .manufacturer-directory {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .manufacturer-directory {
+    grid-template-columns: 1fr;
+  }
+
+  .manufacturer-directory-card {
+    min-height: 205px;
+  }
+}
+
+/* Executive inbox and used-aircraft auctions */
+.nav-unread { min-width: 20px; height: 20px; display: grid; place-items: center; margin-left: auto; padding: 0 .35rem; border-radius: 999px; background: #c78c2f; color: #fff; font-size: .62rem; font-style: normal; font-weight: 900; }
+.used-market-switch { width: max-content; display: flex; gap: .35rem; margin: 0 0 1rem; padding: .3rem; border-radius: 7px; background: #edf1f4; }
+.used-market-switch button { min-height: 38px; display: flex; align-items: center; gap: .35rem; padding: .5rem .85rem; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #627184; font-size: .72rem; font-weight: 800; }
+.used-market-switch button.active { border-color: #d8dfe5; background: #fff; color: #172a42; box-shadow: 0 3px 10px rgba(17,35,55,.07); }
+.used-market-switch svg { width: 15px; }
+.auction-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .85rem; }
+.auction-card { min-width: 0; display: flex; flex-direction: column; padding: 1.05rem; border: 1px solid #dce3e8; border-radius: 8px; background: linear-gradient(145deg,#fff,#f7f9fa); }
+.auction-card>header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; color: #8a671f; font-size: .6rem; font-weight: 850; letter-spacing: .08em; }
+.auction-card>header strong { color: #536274; font-family: var(--font-mono); }
+.auction-card h3 { margin: .25rem 0; color: #17283e; }
+.auction-card>p { min-height: 34px; margin: 0 0 .9rem; color: #758392; font-size: .68rem; line-height: 1.45; }
+.auction-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin: 0 0 1rem; }
+.auction-card dl div { display: flex; flex-direction: column; gap: .15rem; }
+.auction-card dt { color: #8793a0; font-size: .59rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.auction-card dd { margin: 0; color: #26384d; font-size: .76rem; font-weight: 750; }
+.auction-card>small { margin-top: .6rem; color: #7b8895; font-size: .63rem; line-height: 1.4; text-align: center; }
+.executive-inbox { min-height: 620px; display: grid; grid-template-columns: minmax(280px, .42fr) minmax(0,1fr); gap: .8rem; }
+.inbox-list,.inbox-reader { overflow: hidden; padding: 0; }
+.inbox-list .panel-heading { padding: 1rem; border-bottom: 1px solid #e2e7eb; }
+.inbox-list .panel-heading>strong { color: #9a6c22; font-size: .66rem; }
+.inbox-row { width: 100%; display: grid; grid-template-columns: 20px minmax(0,1fr); gap: .7rem; padding: .85rem 1rem; border: 0; border-bottom: 1px solid #e7ebee; background: #fff; color: #22354b; text-align: left; }
+.inbox-row:hover,.inbox-row.active { background: #f3f6f8; }
+.inbox-row.unread { box-shadow: inset 3px 0 #ca9134; }
+.inbox-row>svg { width: 17px; margin-top: .15rem; color: #7c8996; }
+.inbox-row>span { min-width: 0; display: flex; flex-direction: column; gap: .18rem; }
+.inbox-row strong,.inbox-row b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inbox-row strong { font-size: .66rem; }.inbox-row b { font-size: .73rem; }.inbox-row small { color: #8a96a2; font-size: .59rem; }
+.inbox-reader { display: flex; flex-direction: column; }
+.inbox-reader>header { padding: 1.35rem 1.5rem; border-bottom: 1px solid #e1e6ea; }
+.inbox-reader h2 { margin: .5rem 0 .4rem; color: #17283e; font-size: 1.25rem; }
+.inbox-reader header p,.inbox-reader header small { margin: 0; color: #718090; font-size: .72rem; }
+.mail-priority { padding: .23rem .42rem; border-radius: 999px; background: #edf1f4; color: #687789; font-size: .56rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.mail-priority.important { background: #fff1d8; color: #966316; }.mail-priority.urgent { background: #fbe5e3; color: #a33c35; }
+.mail-body { flex: 1; padding: 1.4rem 1.5rem; color: #33475c; font-size: .86rem; line-height: 1.65; }.mail-body p { margin: 0; }
+.mail-deadline { margin: 0 1.5rem 1rem; padding: .7rem .8rem; border-left: 3px solid #c98f31; background: #fff7e8; color: #6e5426; font-size: .7rem; }
+.inbox-reader>footer { display: flex; flex-wrap: wrap; gap: .55rem; padding: 1rem 1.5rem; border-top: 1px solid #e1e6ea; background: #f8fafb; }
+.inbox-empty { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .45rem; padding: 2rem; color: #7b8896; text-align: center; }.inbox-empty svg { width: 34px; }.inbox-empty strong { color: #31455a; }.inbox-empty span { max-width: 300px; font-size: .72rem; line-height: 1.5; }
+@media (max-width: 980px) { .auction-grid { grid-template-columns: 1fr; }.executive-inbox { grid-template-columns: 1fr; }.inbox-list { max-height: 330px; overflow-y: auto; } }
+@media (max-width: 560px) { .used-market-switch { width: 100%; }.used-market-switch button { flex: 1; justify-content: center; }.inbox-reader>header,.mail-body,.inbox-reader>footer { padding-left: 1rem; padding-right: 1rem; } }
+
+/* Global aircraft lessor marketplace */
+.lessor-market { display: grid; gap: 1rem; }
+.lessor-market-nav { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .4rem; padding: .35rem; border-radius: 8px; background: #edf1f4; }
+.lessor-market-nav>button { min-height: 48px; display: flex; align-items: center; justify-content: center; gap: .45rem; padding: .65rem .8rem; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #627184; font-size: .72rem; font-weight: 800; }
+.lessor-market-nav>button.active { border-color: #d8dfe5; background: #fff; color: #172a42; box-shadow: 0 3px 10px rgba(17,35,55,.07); }
+.lessor-market-nav svg { width: 16px; }.lessor-market-nav button span { min-width: 20px; padding: .1rem .32rem; border-radius: 999px; background: #d9a044; color: #fff; font-size: .58rem; }
+.lessor-directory { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .8rem; }
+.lessor-directory-card { min-width: 0; min-height: 250px; display: flex; flex-direction: column; gap: .9rem; padding: 1rem; border: 1px solid #dce3e8; border-radius: 9px; background: linear-gradient(145deg,#fff,#f6f9fa); color: #17283e; text-align: left; transition: transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+.lessor-directory-card:hover { border-color: #c99336; box-shadow: 0 12px 26px rgba(20,38,59,.1); transform: translateY(-2px); }
+.lessor-brand-mark { height: 62px; display: flex; align-items: center; justify-content: space-between; padding: .7rem .8rem; border-radius: 7px; background: #112a45; color: #dca13b; }
+.lessor-brand-mark svg { width: 24px; }.lessor-brand-mark span { font-family: var(--font-mono); font-size: 1rem; font-weight: 900; letter-spacing: .08em; }
+.lessor-directory-card>div:nth-child(2) { display: flex; flex-direction: column; gap: .26rem; }.lessor-directory-card>div:nth-child(2)>span { color: #9a6c22; font-size: .58rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.lessor-directory-card h3 { margin: 0; font-size: .98rem; }.lessor-directory-card p { display: flex; align-items: center; gap: .3rem; margin: 0; color: #718090; font-size: .68rem; }.lessor-directory-card p svg { width: 13px; }.lessor-directory-card small { color: #718090; font-size: .68rem; line-height: 1.45; }
+.lessor-directory-card footer { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: auto; padding-top: .7rem; border-top: 1px solid #e1e7eb; color: #718090; font-size: .62rem; }.lessor-directory-card footer span,.lessor-directory-card footer strong { display: flex; align-items: center; gap: .25rem; }.lessor-directory-card footer svg { width: 14px; }.lessor-directory-card footer strong { color: #21476c; }
+.lessor-profile-strip { display: grid; grid-template-columns: 1fr 1.6fr 1fr; border: 1px solid #dfe5ea; border-radius: 8px; background: #fff; }.lessor-profile-strip>div { min-width: 0; display: flex; flex-direction: column; gap: .3rem; padding: .8rem 1rem; border-right: 1px solid #e4e9ed; }.lessor-profile-strip>div:last-child { border-right: 0; }.lessor-profile-strip span { color: #8793a0; font-size: .58rem; font-weight: 850; letter-spacing: .08em; }.lessor-profile-strip strong { color: #24384d; font-size: .73rem; }
+.lessor-offer-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .85rem; }
+.lessor-offer-card { min-width: 0; display: flex; flex-direction: column; padding: 1.05rem; border: 1px solid #dce3e8; border-radius: 8px; background: linear-gradient(145deg,#fff,#f7f9fa); }.lessor-airframe-heading { display: flex; justify-content: space-between; align-items: center; color: #516174; font-family: var(--font-mono); font-size: .65rem; font-weight: 800; }.lessor-airframe-heading em { padding: .2rem .38rem; border-radius: 999px; background: #e8f4ef; color: #23745e; font-family: inherit; font-size: .56rem; font-style: normal; }
+.lessor-offer-card .market-aircraft-icon { margin: .8rem 0 .45rem; }.lessor-offer-card h3 { margin: 0; color: #17283e; font-size: 1.04rem; }.lessor-offer-card>p { display: flex; align-items: center; gap: .3rem; margin: .28rem 0 .9rem; color: #718090; font-size: .68rem; }.lessor-offer-card>p svg { width: 13px; }
+.lessor-offer-card dl { display: grid; grid-template-columns: repeat(3,1fr); gap: .65rem; margin: 0 0 .9rem; }.lessor-offer-card dl div { display: flex; flex-direction: column; gap: .14rem; }.lessor-offer-card dt { color: #8793a0; font-size: .57rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }.lessor-offer-card dd { margin: 0; color: #26384d; font-size: .72rem; font-weight: 750; }
+.lease-cost-stack { display: flex; flex-direction: column; gap: .24rem; margin-top: auto; padding: .8rem 0; border-top: 1px solid #e2e7eb; }.lease-cost-stack>div { display: flex; justify-content: space-between; align-items: baseline; }.lease-cost-stack span { color: #8793a0; font-size: .58rem; font-weight: 850; letter-spacing: .06em; }.lease-cost-stack strong { color: #1c775f; font-size: 1rem; }.lease-cost-stack small { color: #728091; font-size: .62rem; }
+.lease-comparison-wrap { overflow-x: auto; border: 1px solid #dfe5ea; border-radius: 8px; }.lease-comparison { width: 100%; min-width: 1050px; border-collapse: collapse; background: #fff; }.lease-comparison th { padding: .7rem .75rem; border-bottom: 1px solid #dfe5ea; background: #f3f6f8; color: #758392; font-size: .58rem; letter-spacing: .06em; text-align: left; text-transform: uppercase; }.lease-comparison td { padding: .8rem .75rem; border-bottom: 1px solid #e7ebee; color: #33475c; font-size: .7rem; }.lease-comparison td:first-child,.lease-comparison td:nth-child(2) { min-width: 165px; }.lease-comparison td strong,.lease-comparison td small { display: block; }.lease-comparison td small { margin-top: .16rem; color: #84909d; font-size: .61rem; }
+.lease-application-list { display: grid; gap: .65rem; }.lease-application-list>article { display: grid; grid-template-columns: 1fr 1.5fr; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid #dfe5ea; border-radius: 8px; background: #fff; }.lease-application-list h3 { margin: .25rem 0; color: #17283e; font-size: .9rem; }.lease-application-list p { margin: 0; color: #718090; font-size: .67rem; }.lease-application-list>article>div>span { color: #9a6c22; font-size: .58rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }.lease-application-list dl { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin: 0; }.lease-application-list dl div { display: flex; flex-direction: column; gap: .2rem; }.lease-application-list dt { color: #8793a0; font-size: .57rem; font-weight: 800; text-transform: uppercase; }.lease-application-list dd { margin: 0; color: #33475c; font-size: .68rem; }
+@media (max-width: 1050px) { .lessor-directory { grid-template-columns: repeat(2,minmax(0,1fr)); }.lessor-offer-grid { grid-template-columns: 1fr; } }
+@media (max-width: 680px) { .lessor-market-nav,.lessor-directory,.lessor-profile-strip { grid-template-columns: 1fr; }.lessor-profile-strip>div { border-right: 0; border-bottom: 1px solid #e4e9ed; }.lessor-profile-strip>div:last-child { border-bottom: 0; }.lessor-offer-card dl { grid-template-columns: 1fr 1fr; }.lease-application-list>article { grid-template-columns: 1fr; }.lease-application-list dl { grid-template-columns: 1fr; } }
+
+/* Pre-owned aircraft dossiers */
+.used-aircraft-market,.used-dossier { display: grid; gap: 1rem; }
+.used-listing-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .85rem; }
+.used-listing-card { min-width: 0; display: flex; flex-direction: column; padding: 1.05rem; border: 1px solid #dce3e8; border-radius: 8px; background: linear-gradient(145deg,#fff,#f7f9fa); }
+.used-listing-card>header { display: flex; align-items: center; justify-content: space-between; color: #536274; font-family: var(--font-mono); font-size: .68rem; font-weight: 850; }.used-listing-card>header button { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 5px; background: #edf2f5; color: #9b6c20; }.used-listing-card>header svg { width: 15px; }
+.used-listing-card .market-aircraft-icon { margin: .75rem 0 .45rem; }.used-listing-card h3 { margin: 0; color: #17283e; font-size: 1.02rem; }.used-listing-card>p { display: flex; align-items: center; gap: .3rem; min-height: 28px; margin: .25rem 0 .8rem; color: #718090; font-size: .66rem; }.used-listing-card>p svg { width: 13px; }
+.used-listing-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: 0 0 .85rem; }.used-listing-card dl div { display: flex; flex-direction: column; gap: .13rem; }.used-listing-card dt { color: #8793a0; font-size: .57rem; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }.used-listing-card dd { margin: 0; color: #2c4055; font-size: .72rem; font-weight: 750; }
+.used-listing-price { display: flex; flex-direction: column; gap: .18rem; margin-top: auto; padding: .8rem 0; border-top: 1px solid #e2e7eb; }.used-listing-price span { color: #8793a0; font-size: .57rem; font-weight: 850; letter-spacing: .06em; }.used-listing-price strong { color: #1c775f; font-size: 1rem; }.used-listing-price small { color: #748292; font-size: .62rem; }
+.used-dossier-hero { min-height: 118px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 1rem; padding: 1rem 1.2rem; border: 1px solid #dce3e8; border-radius: 9px; background: linear-gradient(120deg,#fff,#f5f8fa); }.used-dossier-hero .market-aircraft-icon { margin: 0; }.used-dossier-hero>div:nth-child(2)>span { color: #9a6c22; font-size: .58rem; font-weight: 850; letter-spacing: .09em; }.used-dossier-hero h2 { margin: .25rem 0; color: #17283e; font-size: 1.35rem; }.used-dossier-hero p { margin: 0; color: #718090; font-size: .72rem; }.used-dossier-hero>button { display: flex; align-items: center; gap: .35rem; padding: .55rem .7rem; border: 1px solid #d8e0e6; border-radius: 6px; background: #fff; color: #5d6d7e; font-size: .68rem; font-weight: 800; }.used-dossier-hero>button.watched { border-color: #d7b169; color: #8e641e; }.used-dossier-hero>button svg { width: 15px; }
+.dossier-tabs { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); padding: .3rem; border-radius: 7px; background: #edf1f4; }.dossier-tabs button { min-height: 40px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #627184; font-size: .68rem; font-weight: 800; text-transform: capitalize; }.dossier-tabs button.active { border-color: #d8dfe5; background: #fff; color: #172a42; box-shadow: 0 3px 10px rgba(17,35,55,.07); }
+.dossier-panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }.dossier-panel-grid>article,.dossier-section,.dossier-commercial { padding: 1.1rem; border: 1px solid #dce3e8; border-radius: 8px; background: #fff; }.dossier-panel-grid>article>span,.dossier-section-heading span,.dossier-commercial article>span { color: #9a6c22; font-size: .58rem; font-weight: 850; letter-spacing: .08em; }.dossier-panel-grid dl { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; margin: 1rem 0 0; }.dossier-panel-grid dl div { display: flex; flex-direction: column; gap: .18rem; }.dossier-panel-grid dt { color: #8793a0; font-size: .58rem; font-weight: 800; text-transform: uppercase; }.dossier-panel-grid dd { margin: 0; color: #2c4055; font-size: .74rem; font-weight: 750; }
+.dossier-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }.dossier-section-heading h3 { margin: .25rem 0 0; color: #17283e; }.dossier-section-heading em { padding: .35rem .5rem; border-radius: 5px; background: #fff2db; color: #98671c; font-size: .62rem; font-style: normal; }
+.component-condition-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .7rem; }.component-condition-grid>div { display: flex; flex-direction: column; gap: .35rem; padding: .75rem; border: 1px solid #e2e7eb; border-radius: 6px; }.component-condition-grid span { color: #718090; font-size: .63rem; font-weight: 750; text-transform: capitalize; }.component-condition-grid strong { color: #24384d; font-size: .82rem; }.component-condition-grid i { height: 5px; overflow: hidden; border-radius: 999px; background: #e9edf0; }.component-condition-grid i b { height: 100%; display: block; border-radius: inherit; background: #c89034; }
+.inspection-callout { display: flex; flex-direction: column; align-items: flex-start; }.inspection-callout>svg { width: 28px; color: #c78d30; }.inspection-callout h3 { margin: .6rem 0 .3rem; color: #17283e; }.inspection-callout p { margin: 0 0 1rem; color: #718090; font-size: .72rem; line-height: 1.5; }.inspection-callout>div { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: auto; }
+.history-metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: .7rem; }.history-metrics>div { display: flex; flex-direction: column; gap: .3rem; padding: .8rem; border: 1px solid #e2e7eb; border-radius: 6px; }.history-metrics span { color: #8793a0; font-size: .57rem; font-weight: 850; }.history-metrics strong { color: #263b50; font-size: .76rem; }
+.dossier-commercial { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }.dossier-commercial article { display: flex; flex-direction: column; gap: .25rem; }.dossier-commercial article>strong { color: #1c775f; font-size: 1.35rem; }.dossier-commercial article>small { color: #718090; font-size: .65rem; }.dossier-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem; }
+@media (max-width: 1050px) { .used-listing-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.component-condition-grid { grid-template-columns: repeat(2,1fr); }.history-metrics { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 680px) { .used-listing-grid,.dossier-panel-grid { grid-template-columns: 1fr; }.used-dossier-hero { grid-template-columns: auto 1fr; }.used-dossier-hero>button { grid-column: 1/-1; width: max-content; }.dossier-tabs { grid-template-columns: 1fr 1fr; }.component-condition-grid,.history-metrics { grid-template-columns: 1fr; }.dossier-commercial { align-items: stretch; flex-direction: column; }.dossier-actions { justify-content: stretch; }.dossier-actions button { flex: 1; } }
+
+/* Fleet operations workspace */
+.fleet-workspace-nav { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: .35rem; padding: .35rem; border-radius: 8px; background: #e9eef2; }
+.fleet-workspace-nav button { min-height: 46px; padding: .55rem .7rem; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #617083; font-size: .68rem; font-weight: 800; }.fleet-workspace-nav button.active { border-color: #d5dde4; background: #fff; color: #172a42; box-shadow: 0 4px 12px rgba(17,35,55,.07); }
+.fleet-empty-workspace { min-height: 430px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: .55rem; padding: 2rem; border: 1px dashed #ccd6df; border-radius: 9px; background: #f8fafb; color: #718090; text-align: center; }.fleet-empty-workspace svg { width: 42px; }.fleet-empty-workspace h2 { margin: .3rem 0 0; color: #25394e; }.fleet-empty-workspace p { max-width: 440px; margin: 0; font-size: .76rem; line-height: 1.5; }
+.fleet-operations-overview { display: grid; gap: .8rem; }.fleet-attention { overflow: hidden; padding: 0; }.fleet-attention .panel-heading { padding: 1rem; border-bottom: 1px solid #e3e8ec; }.fleet-attention>button { width: 100%; min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 1rem; border: 0; border-bottom: 1px solid #e7ebee; background: #fff; color: #34485d; text-align: left; }.fleet-attention>button:hover { background: #f4f7f9; }.fleet-attention>button>span { display: flex; align-items: center; gap: .55rem; font-size: .72rem; }.fleet-attention>button svg { width: 17px; color: #c18a32; }.fleet-attention>button strong { color: #172b42; }.fleet-attention>button em { padding: .25rem .42rem; border-radius: 999px; background: #fff1d9; color: #93631a; font-size: .58rem; font-style: normal; font-weight: 800; }
+.aircraft-register-table-wrap { overflow-x: auto; border: 1px solid #dce3e8; border-radius: 8px; }.aircraft-register-table { width: 100%; min-width: 930px; border-collapse: collapse; background: #fff; }.aircraft-register-table th { padding: .7rem .8rem; border-bottom: 1px solid #dce3e8; background: #f2f5f7; color: #788593; font-size: .58rem; letter-spacing: .06em; text-align: left; text-transform: uppercase; }.aircraft-register-table td { padding: .85rem .8rem; border-bottom: 1px solid #e7ebee; color: #33475c; font-size: .7rem; }.aircraft-register-table td strong,.aircraft-register-table td small { display: block; }.aircraft-register-table td small { margin-top: .15rem; color: #84909d; font-size: .61rem; }.register-status { padding: .25rem .4rem; border-radius: 999px; background: #edf2f5; color: #53677b; font-size: .59rem; font-weight: 800; }
+.aircraft-workspace { display: grid; gap: .8rem; }.aircraft-workspace-hero { min-height: 112px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 1rem; padding: 1rem 1.2rem; border: 1px solid #dce3e8; border-radius: 9px; background: linear-gradient(120deg,#fff,#f4f7f9); }.aircraft-workspace-hero .market-aircraft-icon { margin: 0; }.aircraft-workspace-hero>div:nth-child(2)>span { color: #9a6c22; font-size: .58rem; font-weight: 850; letter-spacing: .08em; }.aircraft-workspace-hero h2 { margin: .22rem 0; color: #17283e; font-size: 1.35rem; }.aircraft-workspace-hero p { margin: 0; color: #718090; font-size: .72rem; }.readiness-badge { display: flex; align-items: center; gap: .35rem; padding: .5rem .65rem; border-radius: 6px; font-size: .66rem; font-weight: 800; }.readiness-badge svg { width: 16px; }.readiness-badge.ready { background: #e7f4ef; color: #20735b; }.readiness-badge.attention { background: #fff1d9; color: #93631a; }
+.aircraft-workspace-tabs { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); padding: .3rem; border-radius: 7px; background: #edf1f4; }.aircraft-workspace-tabs button { min-height: 40px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #627184; font-size: .63rem; font-weight: 800; text-transform: capitalize; }.aircraft-workspace-tabs button.active { border-color: #d8dfe5; background: #fff; color: #172a42; }
+.active-work-banner { display: flex; align-items: center; gap: .7rem; padding: .75rem .9rem; border-left: 3px solid #c68e32; border-radius: 5px; background: #fff6e7; color: #76551e; }.active-work-banner svg { width: 20px; }.active-work-banner div { display: flex; flex-direction: column; gap: .15rem; }.active-work-banner strong { font-size: .72rem; }.active-work-banner span { font-size: .63rem; }
+.fleet-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }.fleet-detail-grid>article,.workspace-panel { padding: 1.1rem; border: 1px solid #dce3e8; border-radius: 8px; background: #fff; }.fleet-detail-grid>article>span,.workspace-heading span { color: #9a6c22; font-size: .58rem; font-weight: 850; letter-spacing: .08em; }.fleet-detail-grid dl { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 1rem 0 0; }.fleet-detail-grid dl div { display: flex; flex-direction: column; gap: .15rem; }.fleet-detail-grid dt { color: #8793a0; font-size: .57rem; font-weight: 800; text-transform: uppercase; }.fleet-detail-grid dd { margin: 0; color: #2c4055; font-size: .72rem; font-weight: 750; }.readiness-list { display: grid; gap: .45rem; margin-top: .8rem; }.readiness-list p { display: flex; align-items: center; gap: .45rem; margin: 0; color: #8a96a2; font-size: .7rem; }.readiness-list p.done { color: #23745e; }.readiness-list svg { width: 16px; }
+.workspace-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }.workspace-heading h3 { margin: .22rem 0 0; color: #17283e; }.workspace-heading>small { color: #718090; font-size: .65rem; }.cabin-summary { display: grid; grid-template-columns: repeat(4,1fr); gap: .6rem; margin-bottom: 1rem; }.cabin-summary>div { display: flex; flex-direction: column; gap: .28rem; padding: .75rem; border: 1px solid #e2e7eb; border-radius: 6px; }.cabin-summary span { color: #8793a0; font-size: .56rem; font-weight: 850; }.cabin-summary strong { color: #24384d; font-size: .95rem; }
+.cabin-preset-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: .55rem; }.cabin-preset-grid button { min-height: 115px; display: flex; flex-direction: column; gap: .35rem; padding: .75rem; border: 1px solid #dce3e8; border-radius: 7px; background: #f8fafb; color: #2c4055; text-align: left; }.cabin-preset-grid button.selected { border-color: #c99035; background: #fff8ec; }.cabin-preset-grid button:disabled { opacity: .55; }.cabin-preset-grid strong { font-size: .7rem; }.cabin-preset-grid span { color: #718090; font-size: .62rem; line-height: 1.4; }.workspace-panel>small,.workspace-note { display: block; margin-top: .7rem; color: #7d8996; font-size: .66rem; }
+.maintenance-actions { display: grid; grid-template-columns: repeat(3,1fr); gap: .65rem; }.maintenance-actions button { min-height: 120px; display: flex; align-items: flex-start; flex-direction: column; gap: .35rem; padding: .8rem; border: 1px solid #dce3e8; border-radius: 7px; background: #f8fafb; color: #2b4055; text-align: left; }.maintenance-actions button:hover:not(:disabled) { border-color: #c99035; }.maintenance-actions button:disabled { opacity: .5; }.maintenance-actions svg { width: 20px; color: #b37d28; }.maintenance-actions strong { font-size: .72rem; }.maintenance-actions span { color: #718090; font-size: .62rem; }
+.assignment-state { min-height: 160px; display: flex; align-items: center; justify-content: center; gap: .8rem; color: #687789; text-align: left; }.assignment-state>svg { width: 30px; color: #c48b31; }.assignment-state div { display: flex; flex-direction: column; gap: .3rem; }.assignment-state strong { color: #2b4055; }.assignment-state span { max-width: 480px; font-size: .7rem; line-height: 1.5; }.aircraft-history { display: grid; gap: .7rem; }.aircraft-history>div { display: grid; grid-template-columns: 12px 1fr; gap: .6rem; }.aircraft-history i { width: 8px; height: 8px; margin-top: .25rem; border-radius: 50%; background: #c78e32; }.aircraft-history span { display: flex; flex-direction: column; gap: .15rem; }.aircraft-history strong { color: #2c4055; font-size: .7rem; }.aircraft-history small { color: #7d8996; font-size: .62rem; }
+.induction-board { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; }.induction-board>article { display: flex; flex-direction: column; gap: .85rem; padding: 1rem; border: 1px solid #dce3e8; border-radius: 8px; background: #fff; }.induction-board header { display: flex; justify-content: space-between; align-items: flex-start; }.induction-board header span { color: #9a6c22; font-size: .58rem; font-weight: 850; }.induction-board h3 { margin: .2rem 0 0; color: #17283e; }.induction-board header em { padding: .25rem .4rem; border-radius: 999px; background: #fff1d9; color: #93631a; font-size: .57rem; font-style: normal; }.induction-timeline { display: grid; grid-template-columns: repeat(4,1fr); gap: .25rem; }.induction-timeline>div { display: flex; align-items: center; flex-direction: column; gap: .3rem; color: #8a96a2; font-size: .57rem; text-transform: capitalize; }.induction-timeline i { width: 100%; height: 5px; border-radius: 999px; background: #e4e9ed; }.induction-timeline div.done i { background: #3d9279; }.induction-timeline div.next i { background: #d5a14a; }.induction-board>article>p { display: flex; flex-direction: column; gap: .2rem; margin: 0; color: #34485d; font-size: .7rem; }.induction-board>article>p small { color: #7b8895; font-size: .62rem; }
+@media (max-width: 1050px) { .fleet-workspace-nav { grid-template-columns: repeat(3,1fr); }.aircraft-workspace-tabs { grid-template-columns: repeat(4,1fr); }.cabin-preset-grid { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 680px) { .fleet-workspace-nav,.fleet-detail-grid,.induction-board { grid-template-columns: 1fr; }.aircraft-workspace-hero { grid-template-columns: auto 1fr; }.readiness-badge { grid-column: 1/-1; width: max-content; }.aircraft-workspace-tabs { grid-template-columns: 1fr 1fr; }.cabin-summary,.maintenance-actions { grid-template-columns: 1fr 1fr; }.cabin-preset-grid { grid-template-columns: 1fr; } }
+
+/* Route planning and airport slot coordination */
+.route-workspace { display:grid; gap:.85rem; }
+.route-workspace-nav { display:grid; grid-template-columns:repeat(4,1fr); gap:.35rem; padding:.35rem; border-radius:8px; background:#e9eef2; }
+.route-workspace-nav button { min-height:46px; border:1px solid transparent; border-radius:6px; background:transparent; color:#617083; font-size:.68rem; font-weight:800; }
+.route-workspace-nav button.active { border-color:#d5dde4; background:#fff; color:#172a42; box-shadow:0 4px 12px rgba(17,35,55,.07); }
+.route-workspace-nav button span { margin-left:.35rem; padding:.1rem .35rem; border-radius:999px; background:#cc9438; color:white; font-size:.56rem; }
+.route-register { overflow:hidden; padding:0; }.route-register>.panel-heading,.route-applications>.panel-heading { padding:1rem; border-bottom:1px solid #e1e7eb; }
+.route-empty { min-height:280px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.5rem; padding:2rem; color:#718090; text-align:center; }.route-empty>svg { width:38px; color:#c18a32; }.route-empty h3 { margin:.25rem 0 0; color:#283c51; }.route-empty p { max-width:470px; margin:0 0 .5rem; font-size:.72rem; line-height:1.5; }
+.route-planner-grid { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(280px,.75fr); gap:.85rem; }.route-planner-form,.route-analysis { padding:1.1rem; }
+.route-field { position:relative; display:flex; flex-direction:column; gap:.35rem; }.route-field>span,.route-days>span { color:#8d671f; font-size:.58rem; font-weight:850; letter-spacing:.07em; }.route-field input,.route-field select { width:100%; min-height:44px; padding:.65rem .75rem; border:1px solid #d7e0e6; border-radius:6px; background:#fff; color:#263b50; font-size:.72rem; }.route-field small { color:#7b8997; font-size:.59rem; }
+.route-search { position:relative; }.route-search>svg { position:absolute; left:.7rem; top:50%; width:17px; color:#8794a1; transform:translateY(-50%); }.route-search input { padding-left:2.25rem; }.route-search i { position:absolute; right:.8rem; top:15px; width:14px; height:14px; border:2px solid #d8e0e6; border-top-color:#bd8329; border-radius:50%; animation:spin .8s linear infinite; }
+.route-search-results { width:100%; max-height:315px; overflow:auto; margin-top:.4rem; border:1px solid #d6dfe5; border-radius:7px; background:#fff; box-shadow:0 8px 20px rgba(18,36,56,.1); }.route-search-results button { width:100%; display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:.7rem; padding:.7rem; border:0; border-bottom:1px solid #e7ebee; background:#fff; color:#2c4055; text-align:left; }.route-search-results button:last-child { border-bottom:0; }.route-search-results button:hover,.route-search-results button:focus-visible { background:#f4f7f9; }.route-search-results b,.selected-destination>b { font-family:var(--font-mono); color:#b17925; }.route-search-results span,.selected-destination span { display:flex; flex-direction:column; gap:.15rem; }.route-search-results strong,.selected-destination strong { font-size:.72rem; }.route-search-results small,.selected-destination small { color:#7d8996; font-size:.61rem; }.route-search-results em { color:#7b8997; font-size:.58rem; font-style:normal; }.route-search-feedback { margin-top:.4rem; padding:.8rem; border:1px solid #dce3e8; border-radius:7px; background:#f7f9fa; color:#687789; font-size:.68rem; line-height:1.45; }
+.selected-destination { display:grid; grid-template-columns:55px 1fr auto; align-items:center; gap:.7rem; margin-top:.6rem; padding:.75rem; border:1px solid #d9e2e7; border-left:3px solid #c38a31; border-radius:6px; background:#f8fafb; }.selected-destination>b { font-size:1rem; }.selected-destination button { border:0; background:transparent; color:#8d651f; font-size:.64rem; font-weight:800; }
+.route-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; margin-top:1rem; }.route-form-grid .route-field:first-child { grid-column:1/-1; }
+.route-days { display:flex; flex-direction:column; gap:.45rem; margin-top:1rem; }.route-days>div { display:grid; grid-template-columns:repeat(7,1fr); gap:.35rem; }.route-days button { min-height:38px; border:1px solid #d9e1e6; border-radius:5px; background:#f7f9fa; color:#657587; font-size:.64rem; font-weight:800; }.route-days button.active { border-color:#c58c32; background:#fff5e4; color:#8b611e; }
+.route-submit { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:1.1rem; padding-top:1rem; border-top:1px solid #e2e7eb; }.route-submit p { display:flex; align-items:center; gap:.4rem; margin:0; color:#718090; font-size:.64rem; }.route-submit p svg { width:17px; color:#b77d27; }
+.rotation-preview { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:.7rem; margin-top:1rem; padding:.8rem; border:1px solid #dce3e8; border-radius:7px; background:#f7f9fa; }.rotation-preview>div { display:flex; flex-direction:column; gap:.2rem; }.rotation-preview span { color:#9a6c22; font-size:.56rem; font-weight:850; letter-spacing:.07em; }.rotation-preview strong { color:#2b4055; font-size:.68rem; }.rotation-preview>svg { width:18px; color:#b37c28; }.rotation-preview>small { grid-column:1/-1; color:#718090; font-size:.6rem; }.schedule-issues { display:grid; gap:.35rem; margin-top:.75rem; }.schedule-issues p { display:flex; align-items:center; gap:.4rem; margin:0; padding:.55rem .65rem; border-left:3px solid #b8574e; border-radius:4px; background:#f8ecea; color:#91473f; font-size:.64rem; }.schedule-issues svg { width:15px; flex:none; }
+.route-analysis { display:flex; flex-direction:column; }.route-analysis h2 { margin:.3rem 0; color:#17283e; }.route-analysis>div>p { margin:0; color:#718090; font-size:.68rem; line-height:1.5; }.route-analysis dl { display:grid; gap:0; margin:1rem 0; }.route-analysis dl div { display:flex; justify-content:space-between; gap:1rem; padding:.68rem 0; border-bottom:1px solid #e4e9ed; }.route-analysis dt { color:#7e8b98; font-size:.63rem; }.route-analysis dd { margin:0; color:#293e53; font-size:.69rem; font-weight:800; }.route-viability { display:flex; gap:.65rem; margin-top:auto; padding:.8rem; border-radius:6px; background:#eaf5f1; color:#24745e; }.route-viability>svg { width:22px; }.route-viability span { display:flex; flex-direction:column; gap:.2rem; }.route-viability strong { font-size:.7rem; }.route-viability small { color:#52766c; font-size:.61rem; line-height:1.4; }.route-analysis-empty { flex:1; min-height:260px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.5rem; color:#82909d; text-align:center; }.route-analysis-empty svg { width:30px; }.route-analysis-empty span { max-width:250px; font-size:.66rem; line-height:1.5; }
+.route-applications { overflow:hidden; padding:0; }.route-application-row { display:grid; grid-template-columns:140px minmax(0,1fr) 220px 26px; align-items:center; gap:1rem; padding:.9rem 1rem; border-bottom:1px solid #e4e9ed; }.route-pair { display:flex; align-items:center; gap:.35rem; color:#21476c; font-family:var(--font-mono); }.route-pair svg { width:15px; color:#b37c28; }.route-application-row>div:nth-child(2),.route-application-row>div:nth-child(3) { display:flex; flex-direction:column; gap:.2rem; }.route-application-row strong { color:#2b4055; font-size:.72rem; }.route-application-row small { color:#7e8b98; font-size:.61rem; }.route-application-row>svg { width:19px; color:#b9812b; }.route-plan-status { width:max-content; padding:.25rem .42rem; border-radius:999px; background:#fff1d9; color:#93631a; font-size:.57rem; font-weight:850; text-transform:uppercase; }.route-plan-status.active { background:#e6f4ef; color:#20735b; }.route-plan-status.rejected,.route-plan-status.withdrawn { background:#f5e9e7; color:#9c4a42; }
+.route-register-table { overflow-x:auto; }.route-register-table table { width:100%; min-width:850px; border-collapse:collapse; }.route-register-table th { padding:.7rem .8rem; background:#f2f5f7; color:#788593; font-size:.57rem; text-align:left; }.route-register-table td { padding:.8rem; border-bottom:1px solid #e5eaed; color:#34485d; font-size:.68rem; }.route-register-table td strong,.route-register-table td small { display:flex; align-items:center; gap:.25rem; }.route-register-table td strong svg { width:13px; }.route-register-table td small { margin-top:.15rem; color:#82909d; font-size:.59rem; }.route-register-table td>span { padding:.23rem .4rem; border-radius:999px; background:#e6f4ef; color:#20735b; font-size:.57rem; font-weight:800; }
+.route-register-table td>span.suspended { background:#fff1d9; color:#93631a; }.route-register-table td button svg { width:14px; }
+.weekly-timetable { overflow:hidden; padding:0; }.timetable-heading { padding:1rem; border-bottom:1px solid #dfe6eb; }.timetable-heading label { display:flex; align-items:flex-end; flex-direction:column; gap:.25rem; }.timetable-heading label>span { color:#8d671f; font-size:.55rem; font-weight:850; letter-spacing:.07em; }.timetable-heading select { min-width:235px; padding:.5rem .65rem; border:1px solid #d6dfe5; border-radius:5px; background:#fff; color:#34485d; font-size:.66rem; }.timetable-scroll { overflow-x:auto; }.timetable-grid { min-width:1060px; display:grid; grid-template-columns:160px repeat(7,minmax(120px,1fr)); }.timetable-header { border-bottom:1px solid #dce3e8; background:#f1f4f6; }.timetable-header>div { display:flex; justify-content:center; flex-direction:column; gap:.1rem; min-height:52px; padding:.55rem; border-right:1px solid #e0e6ea; color:#758391; font-size:.58rem; }.timetable-header>div:not(:first-child) { align-items:center; }.timetable-header strong { color:#34485d; font-size:.65rem; }.timetable-header small { color:#8995a1; font-size:.55rem; }.timetable-row { border-bottom:1px solid #e2e7eb; }.timetable-row>div { min-height:96px; padding:.45rem; border-right:1px solid #e3e8ec; }.timetable-aircraft { display:flex; align-items:center; gap:.45rem; background:#f8fafb; }.timetable-aircraft>svg { width:18px; color:#b57d28; }.timetable-aircraft span { display:flex; flex-direction:column; gap:.15rem; }.timetable-aircraft strong { color:#22384e; font-family:var(--font-mono); font-size:.68rem; }.timetable-aircraft small { color:#7e8b98; font-size:.56rem; }.timetable-cell { display:flex; flex-direction:column; gap:.35rem; }.timetable-rotation { display:flex; flex-direction:column; gap:.18rem; padding:.42rem; border-left:3px solid #347e6a; border-radius:4px; background:#eaf4f1; color:#315a50; }.timetable-rotation span { white-space:nowrap; font-family:var(--font-mono); font-size:.54rem; }.timetable-rotation b { color:#1f6e59; }.timetable-rotation.suspended { border-left-color:#bf8730; background:#fff3df; color:#795c2a; opacity:.82; }.timetable-rotation em { margin-top:.12rem; color:#93631a; font-size:.52rem; font-style:normal; font-weight:850; text-transform:uppercase; }.timetable-idle { margin:auto; color:#a0a9b2; font-size:.57rem; }.timetable-maintenance { height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.18rem; border-radius:4px; background:#f2e9e7; color:#8f4c44; text-align:center; }.timetable-maintenance svg { width:17px; }.timetable-maintenance strong { font-size:.58rem; }.timetable-maintenance small { font-size:.53rem; }
+@media (max-width:1000px) { .route-planner-grid { grid-template-columns:1fr; }.route-application-row { grid-template-columns:120px 1fr 180px 24px; } }
+@media (max-width:680px) { .route-workspace-nav,.route-form-grid { grid-template-columns:1fr 1fr; }.route-workspace-nav button { min-height:40px; }.route-form-grid .route-field:first-child { grid-column:1/-1; }.route-days>div { grid-template-columns:repeat(4,1fr); }.route-submit { align-items:stretch; flex-direction:column; }.route-submit button { width:100%; }.rotation-preview { grid-template-columns:1fr; }.rotation-preview>svg { transform:rotate(90deg); }.route-application-row { grid-template-columns:1fr auto; }.route-application-row>div:nth-child(2),.route-application-row>div:nth-child(3) { grid-column:1/-1; }.route-search-results button { grid-template-columns:42px 1fr; }.route-search-results em { display:none; }.timetable-heading { align-items:stretch; flex-direction:column; }.timetable-heading label { align-items:stretch; }.timetable-heading select { width:100%; min-width:0; } }

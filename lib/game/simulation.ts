@@ -1,4 +1,23 @@
 import type { AirlineState } from "@/types/game";
+import { processAuctionDecisions } from "@/lib/game/auctions";
+import { processLeaseDecisions } from "@/lib/game/leasing";
+import { processUsedAircraftTransactions } from "@/lib/game/used-aircraft";
+import { processFleetTasks } from "@/lib/game/fleet-operations";
+import { blockMinutes, processSlotApplications } from "@/lib/game/routes";
+
+export const GAME_MINUTES_PER_REAL_SECOND =
+  1 / 60;
+
+const INITIAL_GAME_TIME = Date.UTC(
+  2026,
+  8,
+  6,
+  8,
+  0,
+  0,
+);
+const GAME_WEEK_MILLISECONDS =
+  7 * 24 * 60 * 60 * 1_000;
 
 export type WeekResult = {
   game: AirlineState;
@@ -8,20 +27,97 @@ export type WeekResult = {
   profit: number;
 };
 
+export function advanceCareerClock(
+  currentGame: AirlineState,
+  gameMinutes: number,
+) {
+  if (
+    !Number.isFinite(gameMinutes) ||
+    gameMinutes <= 0
+  ) {
+    return currentGame;
+  }
+
+  const parsedGameTime = Date.parse(
+    currentGame.gameDateTime,
+  );
+  const currentGameTime = Number.isFinite(
+    parsedGameTime,
+  )
+    ? parsedGameTime
+    : INITIAL_GAME_TIME;
+  const nextGameTime =
+    currentGameTime +
+    gameMinutes * 60 * 1_000;
+  const targetWeek = Math.max(
+    1,
+    Math.floor(
+      (nextGameTime - INITIAL_GAME_TIME) /
+        GAME_WEEK_MILLISECONDS,
+    ) + 1,
+  );
+
+  let nextGame = currentGame;
+
+  while (nextGame.week < targetWeek) {
+    nextGame = advanceCareerWeek(nextGame).game;
+  }
+
+  const auctionGame = processAuctionDecisions({
+    ...nextGame,
+    gameDateTime: new Date(
+      nextGameTime,
+    ).toISOString(),
+    updatedAt: new Date().toISOString(),
+  }, new Date(nextGameTime).toISOString());
+
+  const leaseGame = processLeaseDecisions(
+    auctionGame,
+    new Date(nextGameTime).toISOString(),
+  );
+
+  const usedAircraftGame = processUsedAircraftTransactions(
+    leaseGame,
+    new Date(nextGameTime).toISOString(),
+  );
+
+  const fleetGame = processFleetTasks(
+    usedAircraftGame,
+    new Date(nextGameTime).toISOString(),
+  );
+
+  return processSlotApplications(
+    fleetGame,
+    new Date(nextGameTime).toISOString(),
+  );
+}
+
 export function advanceCareerWeek(
   currentGame: AirlineState,
 ): WeekResult {
-  if (!currentGame.aircraft || !currentGame.route) {
+  const nextWeek = currentGame.week + 1;
+
+  const activePlans = currentGame.routePlans.filter((plan) => plan.status === "active");
+  const hasLegacyOperation = currentGame.routePlans.length === 0 && currentGame.aircraft && currentGame.route;
+
+  if (activePlans.length === 0 && !hasLegacyOperation) {
     return {
-      game: currentGame,
-      week: currentGame.week,
+      game: {
+        ...currentGame,
+        updatedAt: new Date().toISOString(),
+        week: nextWeek,
+        passengers: 0,
+        loadFactor: 0,
+        lastRevenue: 0,
+        lastCosts: 0,
+        lastProfit: 0,
+      },
+      week: nextWeek,
       passengers: 0,
       loadFactor: 0,
       profit: 0,
     };
   }
-
-  const nextWeek = currentGame.week + 1;
 
   const demandWave =
     Math.sin(nextWeek * 1.47) * 2.8;
@@ -58,35 +154,66 @@ export function advanceCareerWeek(
     ),
   );
 
-  const sectors =
-    currentGame.route.weeklyFlights * 2;
+  const operations = activePlans.length > 0
+    ? activePlans.map((plan) => ({
+        route: plan,
+        aircraft: currentGame.fleet.find((item) => item.id === plan.aircraftId)?.aircraft,
+      })).filter((item) => item.aircraft)
+    : [{ route: currentGame.route!, aircraft: currentGame.aircraft! }];
 
-  const passengers = Math.round(
-    sectors *
-      currentGame.aircraft.seats *
-      (nextLoad / 100),
-  );
+  let passengers = 0;
+  let revenue = 0;
+  let fuelCost = 0;
+  let sectors = 0;
 
-  const revenue =
-    passengers *
-    currentGame.route.baseFare *
-    currentGame.strategy.fareMultiplier;
+  operations.forEach(({ route, aircraft }) => {
+    if (!aircraft) return;
+    const routeSectors = route.weeklyFlights * 2;
+    const routePassengers = Math.round(routeSectors * aircraft.seats * (nextLoad / 100));
+    sectors += routeSectors;
+    passengers += routePassengers;
+    revenue += routePassengers * route.baseFare * currentGame.strategy.fareMultiplier;
+    fuelCost += routeSectors * route.distance * aircraft.fuelBurn * 10.8 * (fuelIndex / 100);
+  });
 
-  const fuelCost =
-    sectors *
-    currentGame.route.distance *
-    currentGame.aircraft.fuelBurn *
-    10.8 *
-    (fuelIndex / 100);
+  const monthlyAircraftCommitments =
+    currentGame.fleet.reduce(
+      (total, item) =>
+        total + item.monthlyPayment,
+      0,
+    );
+  const legacyMonthlyLease =
+    currentGame.fleet.length === 0
+      ? currentGame.aircraft.monthlyLease
+      : 0;
+  const weeklyAircraftCommitments =
+    (monthlyAircraftCommitments +
+      legacyMonthlyLease) /
+    4.33;
 
   const costs =
     fuelCost +
-    currentGame.aircraft.monthlyLease / 4.33 +
+    weeklyAircraftCommitments +
     sectors * 31_000 +
     690_000 +
     (nextOnTime < 87 ? 210_000 : 0);
 
   const profit = revenue - costs;
+  const fleet = currentGame.fleet.map((item) => {
+    const weeklyHours = activePlans
+      .filter((plan) => plan.aircraftId === item.id)
+      .reduce((total, plan) => total + (blockMinutes(plan.blockTime) * plan.weeklyFlights * 2) / 60, 0);
+    if (weeklyHours <= 0) return { ...item, utilisationHours: 0 };
+    return {
+      ...item,
+      utilisationHours: Math.round(weeklyHours * 10) / 10,
+      flightHours: Math.round((item.flightHours + weeklyHours) * 10) / 10,
+      flightCycles: (item.flightCycles ?? 0) + activePlans
+        .filter((plan) => plan.aircraftId === item.id)
+        .reduce((total, plan) => total + plan.weeklyFlights * 2, 0),
+      condition: Math.max(45, Math.round((item.condition - weeklyHours * 0.018) * 10) / 10),
+    };
+  });
 
   return {
     week: nextWeek,
@@ -117,6 +244,7 @@ export function advanceCareerWeek(
       lastCosts: costs,
       lastProfit: profit,
       passengers,
+      fleet,
     },
   };
 }

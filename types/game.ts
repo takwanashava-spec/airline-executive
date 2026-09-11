@@ -5,13 +5,165 @@ import type {
   Strategy,
 } from "@/lib/game-data";
 
-export const CURRENT_SAVE_VERSION = 3;
+export const CURRENT_SAVE_VERSION = 12;
+
+export type GameSpeed = 0 | 1 | 60 | 360;
+
+export type FleetAircraftStatus =
+  | "parked"
+  | "active"
+  | "maintenance"
+  | "delivery"
+  | "induction";
+
+export type CabinPreset = "high-density" | "standard" | "two-class" | "three-class" | "premium";
+export type InductionStage = "not-started" | "technical" | "registration" | "cabin" | "base" | "complete";
+export type FleetTask = {
+  id: string;
+  aircraftId: string;
+  kind: "induction" | "maintenance";
+  label: string;
+  provider: string;
+  startedAt: string;
+  completesAt: string;
+  cost: number;
+  status: "active" | "completed";
+  targetStage?: InductionStage;
+};
+
+export type AircraftAcquisitionType =
+  | "owned"
+  | "leased"
+  | "financed";
+
+export type AircraftMarket =
+  | "new"
+  | "used"
+  | "lessor";
+
+export type InboxAction = {
+  id: "accept" | "revise" | "withdraw";
+  label: string;
+  requiresAmount?: boolean;
+};
+
+export type InboxMessage = {
+  id: string;
+  threadId: string;
+  category: "aircraft" | "used-aircraft" | "auction" | "finance" | "operations" | "network";
+  senderName: string;
+  senderCompany: string;
+  subject: string;
+  body: string;
+  receivedAt: string;
+  priority: "normal" | "important" | "urgent";
+  status: "unread" | "read" | "resolved" | "expired";
+  responseDeadline?: string;
+  relatedBidId?: string;
+  actions: InboxAction[];
+};
+
+export type RoutePlan = {
+  id: string;
+  from: string;
+  destination: Hub;
+  distance: number;
+  blockTime: string;
+  demand: number;
+  competition: "Low" | "Medium" | "High";
+  weeklyFlights: number;
+  baseFare: number;
+  departureTime: string;
+  returnDepartureTime: string;
+  turnaroundMinutes: number;
+  outboundFlightNumber: string;
+  returnFlightNumber: string;
+  operatingDays: number[];
+  aircraftId: string;
+  createdAt: string;
+  status: "draft" | "slots-pending" | "slots-offered" | "active" | "suspended" | "rejected" | "withdrawn";
+};
+
+export type SlotApplication = {
+  id: string;
+  routePlanId: string;
+  submittedAt: string;
+  decisionAt: string;
+  status: "pending" | "approved" | "countered" | "rejected" | "accepted" | "withdrawn";
+  requestedTime: string;
+  requestedReturnTime: string;
+  offeredTime?: string;
+  offeredReturnTime?: string;
+};
+
+export type AuctionBid = {
+  id: string;
+  listingId: string;
+  amount: number;
+  placedAt: string;
+  decisionAt: string;
+  status: "pending" | "accepted" | "countered" | "rejected" | "withdrawn" | "completed";
+  counterAmount?: number;
+};
+
+export type LeaseApplication = {
+  id: string;
+  offerId: string;
+  submittedAt: string;
+  decisionAt: string;
+  status: "pending" | "approved" | "countered" | "rejected" | "withdrawn" | "completed";
+  proposedMonthlyRate: number;
+  approvedMonthlyRate?: number;
+  depositMonths?: number;
+};
+
+export type UsedAircraftTransaction = {
+  id: string;
+  listingId: string;
+  kind: "inspection" | "offer" | "finance" | "purchase";
+  status: "pending" | "reported" | "accepted" | "countered" | "rejected" | "delivery" | "completed" | "withdrawn";
+  submittedAt: string;
+  decisionAt: string;
+  amount: number;
+  counterAmount?: number;
+  inspectionType?: "records" | "physical";
+  deliveryAt?: string;
+};
+
+export type FleetAircraft = {
+  id: string;
+  registration: string;
+  aircraft: Aircraft;
+  acquiredAt: string;
+  purchasePrice: number;
+  condition: number;
+  status: FleetAircraftStatus;
+  acquisitionType: AircraftAcquisitionType;
+  market: AircraftMarket;
+  provider: string;
+  monthlyPayment: number;
+  outstandingBalance: number;
+  manufactureYear: number;
+  flightHours: number;
+  flightCycles?: number;
+  serialNumber?: string;
+  currentLocation?: string;
+  baseCode?: string;
+  inductionStage?: InductionStage;
+  cabinPreset?: CabinPreset;
+  cabinClasses?: { economy: number; premiumEconomy: number; business: number; first: number };
+  insured?: boolean;
+  locallyRegistered?: boolean;
+  nextMaintenanceAt?: string;
+  utilisationHours?: number;
+};
 
 export type View =
   | "overview"
   | "network"
   | "fleet"
-  | "finance";
+  | "finance"
+  | "inbox";
 
 export type AirlineState = {
   saveVersion: number;
@@ -28,7 +180,18 @@ export type AirlineState = {
   hub: Hub;
   strategy: Strategy;
   aircraft: Aircraft | null;
+  fleet: FleetAircraft[];
+  inbox: InboxMessage[];
+  auctionBids: AuctionBid[];
+  leaseApplications: LeaseApplication[];
+  usedAircraftTransactions: UsedAircraftTransaction[];
+  inspectedUsedAircraft: string[];
+  usedAircraftWatchlist: string[];
+  fleetTasks: FleetTask[];
+  routePlans: RoutePlan[];
+  slotApplications: SlotApplication[];
   route: RouteSeed | null;
+  gameDateTime: string;
   week: number;
   cash: number;
   reputation: number;

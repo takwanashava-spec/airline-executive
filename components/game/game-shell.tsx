@@ -8,8 +8,8 @@ import {
   Globe2,
   LayoutDashboard,
   Menu,
+  Mail,
   Plane,
-  Clock3,
   Route,
   Settings,
   Users,
@@ -21,34 +21,94 @@ import { Brand } from "@/components/brand";
 import { CommandCentre } from "@/components/game/command-centre";
 import { FinanceView } from "@/components/game/finance-view";
 import { FleetView } from "@/components/game/fleet-view";
+import { InboxView } from "@/components/game/inbox-view";
 import { NetworkView } from "@/components/game/network-view";
+import type { AircraftAcquisitionMethod } from "@/lib/game/fleet";
+import type { FleetAction } from "@/lib/game/fleet-operations";
+import type { RoutePlanInput } from "@/lib/game/routes";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import type { AirlineState, View } from "@/types/game";
+import type {
+  AirlineState,
+  GameSpeed,
+  View,
+} from "@/types/game";
 
 const navItems = [
   { id: "overview" as View, label: "Command centre", icon: LayoutDashboard },
   { id: "network" as View, label: "Network", icon: Route },
   { id: "fleet" as View, label: "Fleet", icon: Plane },
   { id: "finance" as View, label: "Finance", icon: BarChart3 },
+  { id: "inbox" as View, label: "Inbox", icon: Mail },
 ];
 
 export function GameShell({
   game,
+  clockSpeed,
+  onClockSpeedChange,
+  onAcquireAircraft,
+  onAuctionBid,
+  onLeaseApply,
+  onUsedInspect,
+  onUsedOffer,
+  onUsedFinance,
+  onUsedBuy,
+  onUsedWatchlist,
+  onFleetAction,
+  onSubmitSlotApplication,
+  onSetRouteSuspended,
+  onReadMessage,
+  onRespondToMessage,
 }: {
   game: AirlineState;
+  clockSpeed: GameSpeed;
+  onClockSpeedChange: (
+    speed: GameSpeed,
+  ) => void;
+  onAcquireAircraft: (
+    offerId: string,
+    method: AircraftAcquisitionMethod,
+  ) => void;
+  onAuctionBid: (listingId: string, amount: number) => void;
+  onLeaseApply: (offerId: string) => void;
+  onUsedInspect: (listingId: string, type: "records" | "physical") => void;
+  onUsedOffer: (listingId: string, amount: number) => void;
+  onUsedFinance: (listingId: string) => void;
+  onUsedBuy: (listingId: string) => void;
+  onUsedWatchlist: (listingId: string) => void;
+  onFleetAction: (aircraftId: string, action: FleetAction, option?: string) => void;
+  onSubmitSlotApplication: (input: RoutePlanInput) => boolean;
+  onSetRouteSuspended: (routePlanId: string, suspended: boolean) => void;
+  onReadMessage: (messageId: string) => void;
+  onRespondToMessage: (messageId: string, action: "accept" | "revise" | "withdraw", amount?: number) => void;
 }) {
   const [view, setView] = useState<View>("overview");
   const [mobileNav, setMobileNav] = useState(false);
-  const gameDate = useMemo(
-    () =>
-      new Date(2026, 8, 6 + (game.week - 1) * 7).toLocaleDateString("en-ZA", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-    [game.week],
-  );
+  const { gameDate, gameTime } = useMemo(() => {
+    const date = new Date(game.gameDateTime);
+
+    return {
+      gameDate: date.toLocaleDateString(
+        "en-ZA",
+        {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC",
+        },
+      ),
+      gameTime: date.toLocaleTimeString(
+        "en-ZA",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          timeZone: "UTC",
+        },
+      ),
+    };
+  }, [game.gameDateTime]);
 
   return (
     <div className="game-shell">
@@ -87,6 +147,7 @@ export function GameShell({
             >
               <item.icon />
               <span>{item.label}</span>
+              {item.id === "inbox" && game.inbox.some((mail) => mail.status === "unread") && <em className="nav-unread">{game.inbox.filter((mail) => mail.status === "unread").length}</em>}
               {view === item.id && <i />}
             </button>
           ))}
@@ -141,13 +202,47 @@ export function GameShell({
             <div className="sim-date">
               <CalendarDays />
               <span>WEEK {game.week}</span>
-              <strong>{gameDate}</strong>
+              <strong>
+                {gameDate} · {gameTime}
+              </strong>
             </div>
 
-            <Button className="advance-button" disabled>
-              <Clock3 />
-              Real-time clock coming next
-            </Button>
+            <div
+              className="speed-control"
+              aria-label="Game clock speed"
+            >
+              <button
+                type="button"
+                aria-label="Pause game clock"
+                className={
+                  clockSpeed === 0 ? "active" : ""
+                }
+                onClick={() =>
+                  onClockSpeedChange(0)
+                }
+              >
+                Ⅱ
+              </button>
+
+              {([1, 60, 360] as const).map(
+                (speed) => (
+                  <button
+                    type="button"
+                    key={speed}
+                    className={
+                      clockSpeed === speed
+                        ? "active"
+                        : ""
+                    }
+                    onClick={() =>
+                      onClockSpeedChange(speed)
+                    }
+                  >
+                    {speed}×
+                  </button>
+                ),
+              )}
+            </div>
           </div>
         </header>
 
@@ -188,9 +283,25 @@ export function GameShell({
           </div>
 
           {view === "overview" && <CommandCentre game={game} />}
-          {view === "network" && <NetworkView game={game} />}
-          {view === "fleet" && <FleetView game={game} />}
+          {view === "network" && <NetworkView game={game} onSubmitSlotApplication={onSubmitSlotApplication} onSetRouteSuspended={onSetRouteSuspended} />}
+          {view === "fleet" && (
+            <FleetView
+              game={game}
+              onAcquireAircraft={
+                onAcquireAircraft
+              }
+              onAuctionBid={onAuctionBid}
+              onLeaseApply={onLeaseApply}
+              onUsedInspect={onUsedInspect}
+              onUsedOffer={onUsedOffer}
+              onUsedFinance={onUsedFinance}
+              onUsedBuy={onUsedBuy}
+              onUsedWatchlist={onUsedWatchlist}
+              onFleetAction={onFleetAction}
+            />
+          )}
           {view === "finance" && <FinanceView game={game} />}
+          {view === "inbox" && <InboxView game={game} onRead={onReadMessage} onRespond={onRespondToMessage} />}
         </main>
       </div>
 
