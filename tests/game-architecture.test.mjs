@@ -68,6 +68,79 @@ test("registration creates a versioned career with a game clock", async () => {
   assert.ok(career.createdAt);
 });
 
+test("new aircraft market exposes complete manufacturer catalogues", async () => {
+  const {
+    aircraft,
+    aircraftManufacturers,
+  } = await vite.ssrLoadModule(
+    "/lib/game-data.ts",
+  );
+  const { aircraftMarketOffers } =
+    await vite.ssrLoadModule(
+      "/lib/game/fleet.ts",
+    );
+  const expectedModels = {
+    atr: 2,
+    embraer: 3,
+    airbus: 10,
+    boeing: 9,
+  };
+
+  assert.equal(
+    aircraftManufacturers.length,
+    4,
+  );
+  assert.equal(aircraft.length, 24);
+
+  for (const manufacturer of aircraftManufacturers) {
+    assert.equal(
+      aircraft.filter(
+        (item) =>
+          item.manufacturerId ===
+          manufacturer.id,
+      ).length,
+      expectedModels[manufacturer.id],
+    );
+    assert.ok(manufacturer.fullName);
+  }
+
+  assert.equal(
+    aircraftMarketOffers.filter(
+      (offer) => offer.market === "new",
+    ).length,
+    aircraft.length,
+  );
+});
+
+test("development aircraft are listed but cannot be delivered", async () => {
+  const career = await createTestCareer();
+  const {
+    acquireAircraft,
+    aircraftMarketOffers,
+  } = await vite.ssrLoadModule(
+    "/lib/game/fleet.ts",
+  );
+  const programme =
+    aircraftMarketOffers.find(
+      (offer) =>
+        offer.market === "new" &&
+        offer.aircraft.availability ===
+          "development",
+    );
+
+  assert.ok(programme);
+
+  const result = acquireAircraft(
+    career,
+    programme.id,
+    "finance",
+  );
+
+  assert.ok(result.error);
+  assert.equal(result.aircraft, null);
+  assert.equal(result.game, career);
+});
+
 test("purchasing an aircraft deducts cash and adds it to the fleet", async () => {
   const career = await createTestCareer();
   const {
